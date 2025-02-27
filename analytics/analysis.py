@@ -73,7 +73,7 @@ def save_results(counts, output_path):
     print(f"Results saved to {last_few_dirs_str}")
 
 
-def run_analysis():
+def analyze_technologies():
     print("\nStarting analysis...\n")
 
     current_script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -103,8 +103,8 @@ def run_analysis():
 
     save_results(tech_counts, output_file)
 
-    print("\n Analysing finished\n")
+    print("\n Analysing finished.\n")
 
 
 if __name__ == "__main__":
-    run_analysis()
+    analyze_technologies()
