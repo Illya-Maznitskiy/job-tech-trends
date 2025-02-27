@@ -20,17 +20,25 @@ class DouuaSpider(scrapy.Spider):
     def parse_job_details(self, response):
         title = response.meta.get("title", "No title")
 
-        description = response.css("div.b-typo.vacancy-section p::text").get()
+        description = response.css(
+            "div.b-typo.vacancy-section p::text"
+        ).getall()
+
+        ul_items = response.css(
+            "div.b-typo.vacancy-section ul li::text"
+        ).getall()
+
+        full_description = description + ul_items
         location = response.css("span.place.bi.bi-geo-alt-fill::text").get()
         date_posted = response.css("div.date::text").get()
 
         yield {
             "title": title,
-            "description": description,
+            "description": full_description,
             "location": location,
             "date_posted": date_posted,
             "url": response.url,
         }
 
 
-# TODO: Check the correctness of all data & Add pagination logic
+# TODO: Add pagination logic & Make data visualization structure
