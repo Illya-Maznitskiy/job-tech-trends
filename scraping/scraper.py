@@ -3,7 +3,7 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from scraping.job_scraping.spiders.douua import DouuaSpider
 
-from config import OUTPUT_FILE
+from config import SCRAPING_OUTPUT_FILE
 
 
 os.environ.setdefault(
@@ -14,12 +14,15 @@ os.environ.setdefault(
 def scrape_jobs():
     print("\nStarting scraping...\n")
 
-    if os.path.exists(OUTPUT_FILE):
-        print(f"{OUTPUT_FILE} exists. Deleting the file to overwrite it...")
+    if os.path.exists(SCRAPING_OUTPUT_FILE):
+        print(
+            f"{SCRAPING_OUTPUT_FILE} "
+            f"exists. Deleting the file to overwrite it..."
+        )
         try:
-            os.remove(OUTPUT_FILE)
+            os.remove(SCRAPING_OUTPUT_FILE)
         except OSError as e:
-            print(f"Error deleting {OUTPUT_FILE}: {e}")
+            print(f"Error deleting {SCRAPING_OUTPUT_FILE}: {e}")
             exit(1)
 
     settings = get_project_settings()
@@ -33,7 +36,7 @@ def scrape_jobs():
         print(f"Error during scraping process: {e}")
         exit(1)
 
-    print("\n Scraping finished\n")
+    print("\n Scraping finished.\n")
 
 
 if __name__ == "__main__":
