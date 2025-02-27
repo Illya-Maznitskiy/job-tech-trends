@@ -23,6 +23,7 @@
 # User-specific stuff
 output/
 *.csv
+/analytics/data/tech_counts_plot.png
 
 .idea/
 .idea/**/workspace.xml
