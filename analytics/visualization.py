@@ -1,3 +1,4 @@
+import logging
 import os
 
 import matplotlib
@@ -9,16 +10,22 @@ from config import ANALYSIS_OUTPUT_FILE
 
 
 matplotlib.use("TkAgg")
+logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 
 
 def plot_tech_counts(csv_path):
     tech_counts = pd.read_csv(csv_path)
+    top_tech_counts = tech_counts.sort_values(
+        by="Count", ascending=False
+    ).head(20)
 
     plt.figure(figsize=(10, 6))
 
-    sns.barplot(data=tech_counts, x="Technology", y="Count", palette="viridis")
+    sns.barplot(
+        data=top_tech_counts, x="Technology", y="Count", palette="viridis"
+    )
 
-    plt.title("Technology Counts in Python Job Descriptions")
+    plt.title("Top 20 Technology Counts in Python Job Descriptions")
     plt.xlabel("Technology")
     plt.ylabel("Count")
     plt.xticks(rotation=45, ha="right")
