@@ -36,7 +36,7 @@ def scrape_jobs():
         print(f"Error during scraping process: {e}")
         exit(1)
 
-    print("\n Scraping finished.\n")
+    print("\nScraping finished.\n")
 
 
 if __name__ == "__main__":
