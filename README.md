@@ -8,6 +8,7 @@ Analyze and visualize the most in-demand technologies in the job market.
 ## Technologies Used
 - Python
 - Scrapy
+- Selenium
 - Pandas
 - Matplotlib
 
@@ -32,29 +33,27 @@ pip install -r requirements.txt
 
 ## Run the app
 Open the terminal and use the following command:
+(Average execution time: ~3 minutes)
 ```bash
 python main.py
 ```
 
 
 ## Check result
-- To check result open the path <PATH>:
-```bash
-<OPENING PATH COMMAND>
-```
+- To check result open the path:
+[analytics/data/tech_counts_plot.png](analytics/data/tech_counts_plot.png)
 
 
 # Screenshots:
 
-## Terminal process
+### Scraping Data
+![Scraping Data](screenshots/scraping_terminal_output.png)
 
-### <IMAGE_NAME>
-<IMAGE>
+### Data Analysis 
+![Data Analysis](screenshots/analysis_teminal_output.png)
 
-### <IMAGE_NAME>
-<IMAGE>
+### Visualization Saving 
+![Visualization Saving](screenshots/visualization_terminal_output.png)
 
-## Visualization result
-
-### <IMAGE_NAME>
-<IMAGE>
+### Visualization result
+![Visualization result](screenshots/top_techonlogies.png)
