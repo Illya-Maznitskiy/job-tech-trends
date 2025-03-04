@@ -7,23 +7,12 @@ from collections import Counter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
+from config import TECHNOLOGIES_TO_ANALYZE
+
 nltk.download("stopwords")
 nltk.download("punkt")
 
 STOPWORDS = set(stopwords.words("english"))
-
-TECHNOLOGIES = [
-    "Python",
-    "Django",
-    "Flask",
-    "AWS",
-    "Kubernetes",
-    "TensorFlow",
-    "PyTorch",
-    "SQL",
-    "PostgreSQL",
-    "Docker",
-]
 
 
 def load_data(folder_path):
@@ -57,7 +46,7 @@ def count_technologies(job_descriptions):
 
     tech_frequencies = {
         tech: word_counts[tech.lower()]
-        for tech in TECHNOLOGIES
+        for tech in TECHNOLOGIES_TO_ANALYZE
         if tech.lower() in word_counts
     }
     return tech_frequencies
@@ -68,7 +57,7 @@ def save_results(counts, output_path):
     df.sort_values(by="Count", ascending=False, inplace=True)
     df.to_csv(output_path, index=False)
 
-    last_few_dirs = os.path.normpath(output_path).split(os.sep)[-4:]
+    last_few_dirs = os.path.normpath(output_path).split(os.sep)[-3:]
     last_few_dirs_str = os.sep.join(last_few_dirs)
     print(f"Results saved to {last_few_dirs_str}")
 
@@ -103,7 +92,7 @@ def analyze_technologies():
 
     save_results(tech_counts, output_file)
 
-    print("\n Analysing finished.\n")
+    print("\nAnalysing finished.\n")
 
 
 if __name__ == "__main__":
