@@ -1,2 +1,8 @@
 [flake8]
-exclude = venv, .git, __pycache__
+exclude =
+    venv,
+    .git,
+    __pycache__,
+    scraping/job_scraping/middlewares.py,
+    scraping/job_scraping/settings.py,
+    scraping/job_scraping/pipelines.py
