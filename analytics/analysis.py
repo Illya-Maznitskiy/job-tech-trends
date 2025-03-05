@@ -1,6 +1,8 @@
 import csv
 import os
 import re
+from pathlib import Path
+
 import pandas as pd
 import nltk
 from collections import Counter
@@ -16,17 +18,12 @@ STOPWORDS = set(stopwords.words("english"))
 
 
 def load_data(folder_path):
-    job_descriptions = []
-    for file_name in os.listdir(folder_path):
-        if file_name.endswith(".csv"):
-            with open(
-                os.path.join(folder_path, file_name), "r", encoding="utf-8"
-            ) as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    if "description" in row and row["description"].strip():
-                        job_descriptions.append(row["description"])
-    return job_descriptions
+    return [
+        row["description"]
+        for file in Path(folder_path).glob("*.csv")
+        for row in csv.DictReader(open(file, "r", encoding="utf-8"))
+        if "description" in row and row["description"].strip()
+    ]
 
 
 def preprocess_text(text):
@@ -41,7 +38,7 @@ def count_technologies(job_descriptions):
     word_counts = Counter()
 
     for desc in job_descriptions:
-        words = preprocess_text(desc)
+        words = set(preprocess_text(desc))
         word_counts.update(words)
 
     tech_frequencies = {
