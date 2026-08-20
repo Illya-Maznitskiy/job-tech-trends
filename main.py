@@ -1,12 +1,11 @@
 from analytics import analysis, visualization
 from scraping import scraper
-
+from logger import logger
 
 if __name__ == "__main__":
-    print("\n\tStarting Job Technical Trends...")
+    logger.info("Starting Job Technical Trends...")
 
     scraper.scrape_jobs()
     analysis.analyze_technologies()
     visualization.visualize_jobs()
-
-    print("\n\tJob Technical Trends Completed")
+    logger.info("Job Technical Trends Completed")
