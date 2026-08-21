@@ -11,6 +11,7 @@ Analyze and visualize the most in-demand technologies in the job market.
 - Selenium
 - Pandas
 - Matplotlib
+- ETL
 
 
 ## Features
