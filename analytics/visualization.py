@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from config import ANALYSIS_OUTPUT_FILE
-
+from logger import logger
+from utils import log_line_break
 
 matplotlib.use("TkAgg")
 logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
@@ -34,17 +35,18 @@ def plot_tech_counts(csv_path):
     os.makedirs(os.path.dirname(output_image_path), exist_ok=True)
     plt.tight_layout()
     plt.savefig(output_image_path)
-    print(f"Plot saved to {output_image_path}")
+    logger.info(f"Plot saved to {output_image_path}")
 
     plt.show()
 
 
 def visualize_jobs():
-    print("\nStarting visualization...\n")
+    log_line_break()
+    logger.info("\nStarting visualization...\n")
 
     plot_tech_counts(ANALYSIS_OUTPUT_FILE)
 
-    print("\nFinished visualization.\n")
+    logger.info("\nFinished visualization.\n")
 
 
 if __name__ == "__main__":

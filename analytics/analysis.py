@@ -10,9 +10,12 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 from config import TECHNOLOGIES_TO_ANALYZE
+from logger import logger
+from utils import log_line_break
 
 nltk.download("stopwords")
 nltk.download("punkt")
+nltk.download("punkt_tab")
 
 STOPWORDS = set(stopwords.words("english"))
 
@@ -56,32 +59,31 @@ def save_results(counts, output_path):
 
     last_few_dirs = os.path.normpath(output_path).split(os.sep)[-3:]
     last_few_dirs_str = os.sep.join(last_few_dirs)
-    print(f"Results saved to {last_few_dirs_str}")
+    logger.info(f"Results saved to {last_few_dirs_str}")
 
 
 def analyze_technologies():
-    print("\nStarting analysis...\n")
+    log_line_break()
+    logger.info("\nStarting analysis...\n")
 
     current_script_dir = os.path.dirname(os.path.realpath(__file__))
 
     data_folder = os.path.join(current_script_dir, "../scraping/data/")
     absolute_data_path = os.path.abspath(data_folder)
 
+    logger.info(f"Checking data folder path: {absolute_data_path}")
     if not os.path.exists(absolute_data_path):
-        print(f"Checking data folder path: {absolute_data_path}")
-        print("ERROR: Data folder does not exist!")
+        logger.error("Data folder does not exist!")
         return
-    else:
-        print("Data folder found, proceeding...")
+    logger.info("Data folder found, proceeding...")
 
     output_folder = os.path.join(current_script_dir, "data")
 
+    logger.info(f"Checking output folder path: {output_folder}")
     if not os.path.exists(output_folder):
-        print(f"Checking output folder path: {output_folder}")
-        print("ERROR: Output folder does not exist! Creating it...")
+        logger.info("Output folder does not exist! Creating it...")
         os.makedirs(output_folder)
-    else:
-        print("Output folder found, proceeding...")
+    logger.info("Output folder found, proceeding...")
 
     output_file = os.path.join(output_folder, "tech_counts.csv")
     descriptions = load_data(absolute_data_path)
@@ -89,7 +91,7 @@ def analyze_technologies():
 
     save_results(tech_counts, output_file)
 
-    print("\nAnalysing finished.\n")
+    logger.info("\nAnalysing finished.\n")
 
 
 if __name__ == "__main__":

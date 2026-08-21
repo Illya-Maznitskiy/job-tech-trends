@@ -11,6 +11,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from webdriver_manager.chrome import ChromeDriverManager
 
 from config import DOUUA_URL
+from logger import logger
 
 
 class DouuaSpider(scrapy.Spider):
@@ -61,11 +62,11 @@ class DouuaSpider(scrapy.Spider):
                         meta={"title": title, "company_name": company_name},
                     )
                 except NoSuchElementException as e:
-                    print(f"Element not found: {e}")
+                    logger.error(f"Element not found: {e}")
                 except TimeoutException as e:
-                    print(f"Timeout error: {e}")
+                    logger.error(f"Timeout error: {e}")
                 except Exception as e:
-                    print(f"Error extracting job: {e}")
+                    logger.error(f"Error extracting job: {e}")
 
     def parse_job_details(self, response):
         title = response.meta.get("title", "No title")
