@@ -8,6 +8,10 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 logging.getLogger("selenium").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("PIL").setLevel(logging.WARNING)
+logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
+logging.getLogger("WDM").setLevel(logging.WARNING)
+
 
 logging.basicConfig(
     level=logging.INFO,
