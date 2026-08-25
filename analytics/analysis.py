@@ -20,7 +20,7 @@ nltk.download("punkt_tab")
 STOPWORDS = set(stopwords.words("english"))
 
 
-def load_data(folder_path):
+def load_data(folder_path: str) -> list[str]:
     return [
         row["description"]
         for file in Path(folder_path).glob("*.csv")
@@ -30,14 +30,16 @@ def load_data(folder_path):
 
 
 def preprocess_text(text):
-    text = text.lower()
-    text = re.sub(r"[^\w\s]", "", text)
+    # Clean text: remove noise/punctuation but keep words,
+    # spaces, and tech symbols (+, #, ., /, -)
+    text = re.sub(r"[^\w\s+#./-]", "", text.lower())
+
+    # Convert text into a list of words using smart linguistic rules
     words = word_tokenize(text)
-    words = [word for word in words if word not in STOPWORDS]
-    return words
+    return [word for word in words if word not in STOPWORDS and word != "."]
 
 
-def count_technologies(job_descriptions):
+def count_technologies(job_descriptions: list[str]) -> dict:
     word_counts = Counter()
 
     for desc in job_descriptions:
@@ -46,7 +48,7 @@ def count_technologies(job_descriptions):
 
     tech_frequencies = {
         tech: word_counts[tech.lower()]
-        for tech in TECHNOLOGIES_TO_ANALYZE
+        for tech in TECHNOLOGIES_TO_ANALYZE  # check
         if tech.lower() in word_counts
     }
     return tech_frequencies
