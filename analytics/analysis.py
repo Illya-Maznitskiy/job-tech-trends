@@ -58,10 +58,7 @@ def save_results(counts, output_path):
     df = pd.DataFrame(counts.items(), columns=["Technology", "Count"])
     df.sort_values(by="Count", ascending=False, inplace=True)
     df.to_csv(output_path, index=False)
-
-    last_few_dirs = os.path.normpath(output_path).split(os.sep)[-3:]
-    last_few_dirs_str = os.sep.join(last_few_dirs)
-    logger.info(f"Results saved to {last_few_dirs_str}")
+    logger.info(f"Results saved to {output_path}")
 
 
 def analyze_technologies():
