@@ -6,7 +6,7 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-from config import SCRAPING_OUTPUT_FILE
+from config import SCRAPING_OUTPUT_FILE, MAX_ITEMS_TO_SCRAPE
 
 BOT_NAME = "job_scraping"
 
@@ -16,6 +16,8 @@ NEWSPIDER_MODULE = "scraping.job_scraping.spiders"
 FEED_FORMAT = "csv"
 FEED_URI = SCRAPING_OUTPUT_FILE
 FEED_OVERWRITE = True
+
+CLOSESPIDER_ITEMCOUNT = MAX_ITEMS_TO_SCRAPE
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "job_scraping (+http://www.yourdomain.com)"

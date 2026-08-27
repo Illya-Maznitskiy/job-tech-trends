@@ -1,3 +1,17 @@
+from enum import StrEnum
+
+
+class RawJobColumns(StrEnum):
+    TITLE = "title"
+    COMPANY_NAME = "company_name"
+    DESCRIPTION = "description"
+    LOCATION = "location"
+    DATE_POSTED = "date_posted"
+    URL = "url"
+
+
+MAX_ITEMS_TO_SCRAPE = 10
+
 # Websites to scrape
 WORKUA_URL = "https://work.ua/jobs-python/"
 RABOTAUA_URL = "https://rabota.ua/zapros/python"

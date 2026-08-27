@@ -10,7 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from webdriver_manager.chrome import ChromeDriverManager
 
-from config import DOUUA_URL
+from config import DOUUA_URL, RawJobColumns
 from logger import logger
 
 
@@ -68,7 +68,8 @@ class DouuaSpider(scrapy.Spider):
                 except Exception as e:
                     logger.error(f"Error extracting job: {e}")
 
-    def parse_job_details(self, response):
+    @staticmethod
+    def parse_job_details(response):
         title = response.meta.get("title", "No title")
         company_name = response.meta.get("company_name", "No company")
 
@@ -84,10 +85,10 @@ class DouuaSpider(scrapy.Spider):
         date_posted = response.css("div.date::text").get()
 
         yield {
-            "title": title,
-            "company_name": company_name,
-            "description": full_description,
-            "location": location,
-            "date_posted": date_posted,
-            "url": response.url,
+            RawJobColumns.TITLE: title,
+            RawJobColumns.COMPANY_NAME: company_name,
+            RawJobColumns.DESCRIPTION: full_description,
+            RawJobColumns.LOCATION: location,
+            RawJobColumns.DATE_POSTED: date_posted,
+            RawJobColumns.URL: response.url,
         }
