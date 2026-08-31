@@ -10,17 +10,19 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from webdriver_manager.chrome import ChromeDriverManager
 
-from config import DOUUA_URL, RawJobColumns
+from config import DOU_UA_URL, RawJobColumns, MAX_ITEMS_TO_SCRAPE, Scraper
 from logger import logger
 
 
-class DouuaSpider(scrapy.Spider):
-    name = "douua"
+class DouUaSpider(scrapy.Spider):
+    name = "dou_ua"
     allowed_domains = ["dou.ua"]
-    start_urls = [DOUUA_URL]
+    start_urls = [DOU_UA_URL]
+    limit = MAX_ITEMS_TO_SCRAPE[Scraper.DOU_UA]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.item_count = 0
 
         chrome_options = Options()
         chrome_options.add_argument("--headless")
@@ -31,9 +33,9 @@ class DouuaSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        self.driver.get(DOUUA_URL)
+        self.driver.get(DOU_UA_URL)
 
-        while True:
+        while self.item_count < self.limit:
             jobs = self.driver.find_elements(By.CSS_SELECTOR, ".l-vacancy")
             load_more_btn = WebDriverWait(self.driver, 10).until(
                 ec.element_to_be_clickable(
@@ -47,6 +49,9 @@ class DouuaSpider(scrapy.Spider):
             load_more_btn.click()
 
             for job in jobs:
+                if self.item_count >= self.limit:
+                    break
+
                 try:
                     title = job.find_element(By.CSS_SELECTOR, "a.vt").text
                     company_name = job.find_element(
@@ -55,6 +60,7 @@ class DouuaSpider(scrapy.Spider):
                     job_url = job.find_element(
                         By.CSS_SELECTOR, "a.vt"
                     ).get_attribute("href")
+                    self.item_count += 1
 
                     yield response.follow(
                         job_url,

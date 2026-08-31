@@ -10,12 +10,18 @@ class RawJobColumns(StrEnum):
     URL = "url"
 
 
-MAX_ITEMS_TO_SCRAPE = 10
+class Scraper(StrEnum):
+    DOU_UA = "dou_ua"
+    DJINNI = "djinni"
+
+
+MAX_ITEMS_TO_SCRAPE = {
+    Scraper.DOU_UA: 100,
+    Scraper.DJINNI: 100,
+}
 
 # Websites to scrape
-WORKUA_URL = "https://work.ua/jobs-python/"
-RABOTAUA_URL = "https://rabota.ua/zapros/python"
-DOUUA_URL = "https://jobs.dou.ua/vacancies/?category=Python"
+DOU_UA_URL = "https://jobs.dou.ua/vacancies/?category=Python"
 
 # Output scraping file path
 SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"

@@ -2,7 +2,7 @@ import os
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
-from scraping.job_scraping.spiders.douua import DouuaSpider
+from scraping.job_scraping.spiders.douua import DouUaSpider
 from logger import logger
 from utils import log_line_break
 
@@ -19,7 +19,7 @@ def scrape_jobs():
 
     try:
         logger.info("Scraping Dou.ua started...")
-        process.crawl(DouuaSpider)
+        process.crawl(DouUaSpider)
         process.start()
     except Exception as e:
         logger.error(f"Error during scraping process: {e}")
