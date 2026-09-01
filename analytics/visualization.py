@@ -1,41 +1,44 @@
-import logging
 import os
 
-import matplotlib
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-from config import ANALYSIS_OUTPUT_FILE
+from config import (
+    ANALYSIS_OUTPUT_FILE,
+    VISUALIZATION_OUTPUT_FILE,
+    TECHNOLOGIES_TO_DISPLAY,
+)
 from logger import logger
 from utils import log_line_break
 
-matplotlib.use("TkAgg")
-logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 
-
-def plot_tech_counts(csv_path):
-    tech_counts = pd.read_csv(csv_path)
+def plot_tech_counts(analysis_output_file: str) -> None:
+    tech_counts = pd.read_csv(analysis_output_file)
     top_tech_counts = tech_counts.sort_values(
         by="Count", ascending=False
-    ).head(20)
+    ).head(TECHNOLOGIES_TO_DISPLAY)
 
-    plt.figure(figsize=(10, 6))
-
-    sns.barplot(
-        data=top_tech_counts, x="Technology", y="Count", palette="viridis"
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.set_facecolor("#D9D9D9")
+    plt.bar(
+        top_tech_counts["Technology"],
+        top_tech_counts["Count"],
+        color=plt.cm.ocean(
+            top_tech_counts["Count"] / top_tech_counts["Count"].max()
+        ),
     )
 
-    plt.title("Top 20 Technology Counts in Python Job Descriptions")
+    plt.title(
+        f"Top {TECHNOLOGIES_TO_DISPLAY} Technology Counts in Job Descriptions"
+    )
     plt.xlabel("Technology")
     plt.ylabel("Count")
     plt.xticks(rotation=45, ha="right")
 
-    output_image_path = "analytics/data/tech_counts_plot.png"
-    os.makedirs(os.path.dirname(output_image_path), exist_ok=True)
+    os.makedirs(os.path.dirname(VISUALIZATION_OUTPUT_FILE), exist_ok=True)
     plt.tight_layout()
-    plt.savefig(output_image_path)
-    logger.info(f"Plot saved to {output_image_path}")
+    plt.savefig(VISUALIZATION_OUTPUT_FILE)
+    logger.info(f"Plot saved to {VISUALIZATION_OUTPUT_FILE}")
 
     plt.show()
 
@@ -47,7 +50,3 @@ def visualize_jobs():
     plot_tech_counts(ANALYSIS_OUTPUT_FILE)
 
     logger.info("\nFinished visualization.\n")
-
-
-if __name__ == "__main__":
-    visualize_jobs()
