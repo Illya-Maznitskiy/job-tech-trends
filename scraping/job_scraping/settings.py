@@ -6,12 +6,15 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-from config import SCRAPING_OUTPUT_FILE
+from config import SCRAPING_OUTPUT_FILE, LOGGER_LEVEL
 
 BOT_NAME = "job_scraping"
 
 SPIDER_MODULES = ["scraping.job_scraping.spiders"]
 NEWSPIDER_MODULE = "scraping.job_scraping.spiders"
+
+LOG_ENABLED = False
+LOG_LEVEL = LOGGER_LEVEL
 
 # https://www.geeksforgeeks.org/python/scrapy-feed-exports/
 FEEDS = {SCRAPING_OUTPUT_FILE: {"format": "csv", "overwrite": True}}

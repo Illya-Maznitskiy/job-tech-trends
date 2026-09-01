@@ -26,4 +26,3 @@ def scrape_jobs():
         exit(1)
 
     logger.info("\nScraping finished.\n")
-    log_line_break()

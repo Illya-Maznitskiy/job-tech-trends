@@ -17,9 +17,9 @@ from config import (
 from logger import logger
 from utils import log_line_break
 
-nltk.download("stopwords")
-nltk.download("punkt")
-nltk.download("punkt_tab")
+nltk.download("stopwords", quiet=True)
+nltk.download("punkt", quiet=True)
+nltk.download("punkt_tab", quiet=True)
 
 STOPWORDS = set(stopwords.words("english"))
 

@@ -1,4 +1,5 @@
 from enum import StrEnum
+import logging
 
 
 class RawJobColumns(StrEnum):
@@ -20,14 +21,16 @@ MAX_ITEMS_TO_SCRAPE = {
     Scraper.DJINNI: 100,
 }
 
+LOGGER_LEVEL = logging.INFO
+
 # Websites to scrape
 DOU_UA_URL = "https://jobs.dou.ua/vacancies/?category=Python"
 
-# Output scraping file path
 SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"
-
-# Output analysis file path
 ANALYSIS_OUTPUT_FILE = "analytics/data/tech_counts.csv"
+VISUALIZATION_OUTPUT_FILE = "analytics/data/tech_counts_plot.png"
+
+TECHNOLOGIES_TO_DISPLAY = 20
 
 TECHNOLOGIES_TO_ANALYZE = {
     "python": ["python"],
