@@ -10,12 +10,11 @@ sys.stdout.reconfigure(encoding="utf-8")
 logging.getLogger("scrapy").propagate = False
 logging.getLogger("WDM").setLevel(logging.WARNING)
 
-logging.getLogger("matplotlib.font_manager").setLevel(LOGGER_LEVEL)
+logging.getLogger("matplotlib").setLevel(LOGGER_LEVEL)
 logging.getLogger("asyncio").setLevel(LOGGER_LEVEL)
 logging.getLogger("selenium").setLevel(LOGGER_LEVEL)
 logging.getLogger("urllib3").setLevel(LOGGER_LEVEL)
 logging.getLogger("PIL").setLevel(LOGGER_LEVEL)
-logging.getLogger("PIL.PngImagePlugin").setLevel(LOGGER_LEVEL)
 
 
 logging.basicConfig(
