@@ -3,8 +3,8 @@ from analytics.analysis import count_technologies
 
 def test_main_count_technologies_logic():
     job_descriptions = [
-        "We are looking for an AI Engineer with strong Python and JS background.",
-        "Must have experience in Artificial Intelligence, JavaScript, and ML models.",
+        "Looking for an AI Engineer with strong Python and JS background.",
+        "Must have exp in Artificial Intelligence, JavaScript, and ML models.",
         "Python developer needed, AI and Node.js required.",
     ]
 

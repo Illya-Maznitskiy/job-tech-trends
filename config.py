@@ -259,7 +259,6 @@ TECHNOLOGIES_TO_ANALYZE = {
     "twilio": ["twilio"],
     "stripe": ["stripe"],
     "sendgrid": ["sendgrid"],
-    "firebase": ["firebase"],
     "fastlane": ["fastlane"],
     "ecr": ["ecr", "amazon ecr", "aws ecr"],
 }
