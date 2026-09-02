@@ -1,32 +1,55 @@
-import pytest
-
-from analytics.analysis import preprocess_text
+from analytics.analysis import count_technologies
 
 
-@pytest.mark.parametrize(
-    "input_text, expected_tokens",
-    [
-        (
-            "Python is great! Docker is useful.",
-            ["python", "great", "docker", "useful"],
-        ),
-        (
-            "  FASTAPI and PostgreSQL  ",
-            ["fastapi", "postgresql"],
-        ),
-        (
-            "",
-            [],
-        ),
-        (
-            "is and the, or!",
-            [],
-        ),
-        (
-            "Looking for C++ and Node.js.",
-            ["looking", "c++", "node.js"],
-        ),
-    ],
-)
-def test_preprocess_text(input_text: str, expected_tokens: list[str]) -> None:
-    assert preprocess_text(input_text) == expected_tokens
+def test_main_count_technologies_logic():
+    job_descriptions = [
+        "We are looking for an AI Engineer with strong Python and JS background.",
+        "Must have experience in Artificial Intelligence, JavaScript, and ML models.",
+        "Python developer needed, AI and Node.js required.",
+    ]
+
+    counts = count_technologies(job_descriptions)
+
+    assert counts.get("ai") == 3
+    assert counts.get("python") == 2
+    assert counts.get("javascript") == 3
+    assert counts.get("node.js") == 1
+
+
+def test_count_technologies_symbols_and_dots():
+    job_descriptions = [
+        "Senior C++ and C# developer needed with .NET Core experience.",
+        "Full-stack role: Node.js, React, and Vue.js.",
+        "C++ developer transitioning to C# and .NET microservices.",
+    ]
+
+    counts = count_technologies(job_descriptions)
+
+    assert counts.get("c++") == 2
+    assert counts.get("c#") == 2
+    assert counts.get(".net") == 2
+    assert counts.get("node.js") == 1
+    assert counts.get("vue.js") == 1
+
+
+def test_count_technologies_compound_slash_and_hyphen():
+    job_descriptions = [
+        "Hands-on experience with AI/ML pipelines and CI/CD automation.",
+        "Deep understanding of CI/CD practices.",
+    ]
+
+    counts = count_technologies(job_descriptions)
+
+    assert counts.get("ai") == 1
+    assert counts.get("ml") == 1
+    assert counts.get("ci/cd") == 2
+
+
+def test_count_technologies_deduplication_per_vacancy():
+    job_descriptions = [
+        "AI. Only AI. CEO loves AI.",
+    ]
+
+    counts = count_technologies(job_descriptions)
+
+    assert counts.get("ai") == 1

@@ -4,10 +4,7 @@ import re
 from pathlib import Path
 
 import pandas as pd
-import nltk
 from collections import Counter
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 
 from config import (
     TECHNOLOGIES_TO_ANALYZE,
@@ -16,12 +13,6 @@ from config import (
 )
 from logger import logger
 from utils import log_line_break
-
-nltk.download("stopwords", quiet=True)
-nltk.download("punkt", quiet=True)
-nltk.download("punkt_tab", quiet=True)
-
-STOPWORDS = set(stopwords.words("english"))
 
 
 def get_job_descriptions(folder_path: str) -> list[str]:
@@ -33,29 +24,27 @@ def get_job_descriptions(folder_path: str) -> list[str]:
     ]
 
 
-def preprocess_text(text: str) -> list[str]:
-    # Clean text: remove noise/punctuation but keep words,
-    # spaces, and tech symbols (+, #, ., /, -)
-    text = re.sub(r"[^\w\s+#./-]", "", text.lower())
-
-    # Convert text into a list of words using smart linguistic rules
-    words = word_tokenize(text)
-    return [word for word in words if word not in STOPWORDS and word != "."]
-
-
 def count_technologies(job_descriptions: list[str]) -> dict[str, int]:
     word_counts = Counter()
 
     for desc in job_descriptions:
-        words = set(preprocess_text(desc))
-        word_counts.update(words)
+        desc_lower = desc.lower()
+        vacancy_techs = set()
 
-    tech_frequencies = {
-        tech: word_counts[tech.lower()]
-        for tech in TECHNOLOGIES_TO_ANALYZE
-        if tech.lower() in word_counts
-    }
-    return tech_frequencies
+        for base_name_tech, aliases in TECHNOLOGIES_TO_ANALYZE.items():
+            for alias in aliases:
+                pattern = (
+                    r"(?<![a-z0-9/-])"
+                    + re.escape(alias.lower())
+                    + r"(?![a-z0-9/-])"
+                )
+                if re.search(pattern, desc_lower):
+                    vacancy_techs.add(base_name_tech)
+                    break  # Count tech ONCE per job
+
+        word_counts.update(vacancy_techs)
+
+    return {tech: count for tech, count in word_counts.items() if count > 0}
 
 
 def save_results(counts: dict[str:int], output_path: str) -> None:
