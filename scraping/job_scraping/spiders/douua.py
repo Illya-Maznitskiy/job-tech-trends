@@ -1,4 +1,5 @@
 import time
+import random
 
 import scrapy
 from selenium import webdriver
@@ -45,7 +46,7 @@ class DouUaSpider(scrapy.Spider):
             self.driver.execute_script(
                 "arguments[0].scrollIntoView(true);", load_more_btn
             )
-            time.sleep(1)
+            time.sleep(random.uniform(0.5, 2.5))
             load_more_btn.click()
 
             for job in jobs:
@@ -73,6 +74,8 @@ class DouUaSpider(scrapy.Spider):
                     logger.error(f"Timeout error: {e}")
                 except Exception as e:
                     logger.error(f"Error extracting job: {e}")
+
+        logger.info(f"Total DOU jobs scraped: {self.item_count}")
 
     @staticmethod
     def parse_job_details(response):
