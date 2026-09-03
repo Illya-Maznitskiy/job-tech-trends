@@ -23,7 +23,7 @@ class DouUaSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.item_count = 0
+        self.seen_urls = set()
 
         chrome_options = Options()
         chrome_options.add_argument("--headless")
@@ -36,46 +36,66 @@ class DouUaSpider(scrapy.Spider):
     def parse(self, response):
         self.driver.get(DOU_UA_URL)
 
-        while self.item_count < self.limit:
-            jobs = self.driver.find_elements(By.CSS_SELECTOR, ".l-vacancy")
-            load_more_btn = WebDriverWait(self.driver, 10).until(
-                ec.element_to_be_clickable(
-                    (By.XPATH, "//a[contains(text(),'Більше вакансій')]")
+        while len(self.seen_urls) < self.limit:
+            try:
+                jobs = self.driver.find_elements(By.CSS_SELECTOR, ".l-vacancy")
+                load_more_buttons = self.driver.find_elements(
+                    By.XPATH, "//a[contains(text(),'Більше вакансій')]"
                 )
-            )
-            self.driver.execute_script(
-                "arguments[0].scrollIntoView(true);", load_more_btn
-            )
-            time.sleep(random.uniform(0.5, 2.5))
-            load_more_btn.click()
 
-            for job in jobs:
-                if self.item_count >= self.limit:
+                if (
+                    not load_more_buttons
+                    or not load_more_buttons[0].is_displayed()
+                ):
+                    logger.info(
+                        "Reached end of page (no more 'Більше вакансій' button). Finishing clean."
+                    )
                     break
+                load_more_btn = WebDriverWait(self.driver, 10).until(
+                    ec.element_to_be_clickable(
+                        (By.XPATH, "//a[contains(text(),'Більше вакансій')]")
+                    )
+                )
+                self.driver.execute_script(
+                    "arguments[0].scrollIntoView(true);", load_more_btn
+                )
+                time.sleep(random.uniform(0.5, 2.5))
+                load_more_btn.click()
 
-                try:
+                for job in jobs:
+                    if len(self.seen_urls) >= self.limit:
+                        break
+
+                    job_url = job.find_element(
+                        By.CSS_SELECTOR, "a.vt"
+                    ).get_attribute("href")
+
+                    if job_url in self.seen_urls:
+                        continue
+                    self.seen_urls.add(job_url)
+
                     title = job.find_element(By.CSS_SELECTOR, "a.vt").text
                     company_name = job.find_element(
                         By.CSS_SELECTOR, "a.company"
                     ).text
-                    job_url = job.find_element(
-                        By.CSS_SELECTOR, "a.vt"
-                    ).get_attribute("href")
-                    self.item_count += 1
 
                     yield response.follow(
                         job_url,
                         callback=self.parse_job_details,
                         meta={"title": title, "company_name": company_name},
                     )
-                except NoSuchElementException as e:
-                    logger.error(f"Element not found: {e}")
-                except TimeoutException as e:
-                    logger.error(f"Timeout error: {e}")
-                except Exception as e:
-                    logger.error(f"Error extracting job: {e}")
 
-        logger.info(f"Total DOU jobs scraped: {self.item_count}")
+            except (TimeoutException, NoSuchElementException) as e:
+                logger.info(
+                    f"No more jobs found or page limit reached. Error: {e}"
+                )
+                break
+            except Exception as e:
+                logger.error(f"Error extracting job: {e}")
+                break
+
+        self.driver.quit()
+        logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
 
     @staticmethod
     def parse_job_details(response):
