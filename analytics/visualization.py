@@ -45,8 +45,9 @@ def plot_tech_counts(analysis_output_file: str) -> None:
 
 def visualize_jobs():
     log_line_break()
-    logger.info("\nStarting visualization...\n")
+    logger.info("Starting visualization...")
 
     plot_tech_counts(ANALYSIS_OUTPUT_FILE)
 
-    logger.info("\nFinished visualization.\n")
+    logger.info("Finished visualization.")
+    log_line_break()

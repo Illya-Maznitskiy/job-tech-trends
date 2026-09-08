@@ -56,7 +56,7 @@ def save_results(counts: dict[str:int], output_path: str) -> None:
 
 def analyze_technologies() -> None:
     log_line_break()
-    logger.info("\nStarting analysis...\n")
+    logger.info("Starting analysis...")
 
     if not os.path.exists(SCRAPING_OUTPUT_FILE):
         logger.error(f"Scraped data file not found at: {SCRAPING_OUTPUT_FILE}")
@@ -68,4 +68,4 @@ def analyze_technologies() -> None:
 
     save_results(tech_counts, ANALYSIS_OUTPUT_FILE)
 
-    logger.info("\nAnalysing finished.\n")
+    logger.info("Analysing finished.")

@@ -13,7 +13,7 @@ os.environ.setdefault(
 
 def scrape_jobs():
     log_line_break()
-    logger.info("\nStarting scraping...\n")
+    logger.info("Starting scraping...")
     settings = get_project_settings()
     process = CrawlerProcess(settings)
 
@@ -25,4 +25,4 @@ def scrape_jobs():
         logger.error(f"Error during scraping process: {e}")
         exit(1)
 
-    logger.info("\nScraping finished.\n")
+    logger.info("Scraping finished.")
