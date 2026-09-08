@@ -1,15 +1,6 @@
-import time
-import random
+import json
 
 import scrapy
-from selenium import webdriver
-from selenium.common import NoSuchElementException, TimeoutException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-from webdriver_manager.chrome import ChromeDriverManager
 
 from config import DOU_UA_URL, RawJobColumns, MAX_ITEMS_TO_SCRAPE, Scraper
 from logger import logger
@@ -17,7 +8,7 @@ from logger import logger
 
 class DouUaSpider(scrapy.Spider):
     name = "dou_ua"
-    allowed_domains = ["dou.ua"]
+    allowed_domains = ["dou.ua", "jobs.dou.ua"]
     start_urls = [DOU_UA_URL]
     limit = MAX_ITEMS_TO_SCRAPE[Scraper.DOU_UA]
 
@@ -25,76 +16,70 @@ class DouUaSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
         self.seen_urls = set()
 
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
+    @staticmethod
+    def get_jobs_data(response) -> dict:
+        try:
+            data = json.loads(response.text)
+            html = data.get("html", "")
+            from scrapy import Selector
 
-        self.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=chrome_options,
-        )
+            sel = Selector(text=html)
+            jobs = sel.css("li.l-vacancy")
+        except json.JSONDecodeError:
+            jobs = response.css("li.l-vacancy")
+
+        return jobs
 
     def parse(self, response):
-        self.driver.get(DOU_UA_URL)
+        try:
+            jobs = self.get_jobs_data(response)
+            for job in jobs:
+                if len(self.seen_urls) >= self.limit:
+                    return
+                job_url = job.css("a.vt::attr(href)").get()
+                title = job.css("a.vt::text").get()
+                company_name = job.css("a.company::text").get()
 
-        while len(self.seen_urls) < self.limit:
-            try:
-                jobs = self.driver.find_elements(By.CSS_SELECTOR, ".l-vacancy")
-                load_more_buttons = self.driver.find_elements(
-                    By.XPATH, "//a[contains(text(),'Більше вакансій')]"
+                if job_url in self.seen_urls:
+                    continue
+                self.seen_urls.add(job_url)
+
+                yield response.follow(
+                    job_url,
+                    callback=self.parse_job_details,
+                    meta={"title": title, "company_name": company_name},
                 )
 
-                if (
-                    not load_more_buttons
-                    or not load_more_buttons[0].is_displayed()
-                ):
-                    logger.info(
-                        "Reached end of page (no more 'Більше вакансій' button). Finishing clean."
-                    )
-                    break
-                load_more_btn = WebDriverWait(self.driver, 10).until(
-                    ec.element_to_be_clickable(
-                        (By.XPATH, "//a[contains(text(),'Більше вакансій')]")
-                    )
+            # simulate clicking button through a request
+            csrf_token = response.meta.get("csrf_token")
+
+            if not csrf_token:
+                # Only try CSS if it's the first run on HTML page
+                try:
+                    csrf_token = response.css(
+                        "input[name='csrfmiddlewaretoken']::attr(value)"
+                    ).get()
+                except ValueError:
+                    csrf_token = response.cookies.get("csrftoken")
+
+            if csrf_token and len(self.seen_urls) < self.limit:
+                yield scrapy.FormRequest(
+                    url="https://jobs.dou.ua/vacancies/xhr-load/",
+                    formdata={
+                        "csrfmiddlewaretoken": csrf_token,
+                        "count": str(len(self.seen_urls)),
+                    },
+                    headers={
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Referer": response.url,
+                    },
+                    meta={"csrf_token": csrf_token},
+                    callback=self.parse,
                 )
-                self.driver.execute_script(
-                    "arguments[0].scrollIntoView(true);", load_more_btn
-                )
-                time.sleep(random.uniform(0.5, 2.5))
-                load_more_btn.click()
 
-                for job in jobs:
-                    if len(self.seen_urls) >= self.limit:
-                        break
+        except Exception as e:
+            logger.error(f"Error extracting job: {e}")
 
-                    job_url = job.find_element(
-                        By.CSS_SELECTOR, "a.vt"
-                    ).get_attribute("href")
-
-                    if job_url in self.seen_urls:
-                        continue
-                    self.seen_urls.add(job_url)
-
-                    title = job.find_element(By.CSS_SELECTOR, "a.vt").text
-                    company_name = job.find_element(
-                        By.CSS_SELECTOR, "a.company"
-                    ).text
-
-                    yield response.follow(
-                        job_url,
-                        callback=self.parse_job_details,
-                        meta={"title": title, "company_name": company_name},
-                    )
-
-            except (TimeoutException, NoSuchElementException) as e:
-                logger.info(
-                    f"No more jobs found or page limit reached. Error: {e}"
-                )
-                break
-            except Exception as e:
-                logger.error(f"Error extracting job: {e}")
-                break
-
-        self.driver.quit()
         logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
 
     @staticmethod
