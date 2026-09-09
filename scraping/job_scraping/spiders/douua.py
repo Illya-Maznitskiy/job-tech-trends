@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse, parse_qs
 
 import scrapy
 
@@ -15,6 +16,9 @@ class DouUaSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.seen_urls = set()
+        parsed_url = urlparse(DOU_UA_URL)
+        query_params = parse_qs(parsed_url.query)
+        self.category = query_params.get("category", [None])[0]
 
     @staticmethod
     def get_jobs_data(response) -> dict:
@@ -63,15 +67,25 @@ class DouUaSpider(scrapy.Spider):
                     csrf_token = response.cookies.get("csrftoken")
 
             if csrf_token and len(self.seen_urls) < self.limit:
+                formdata = {
+                    "csrfmiddlewaretoken": csrf_token,
+                    "count": str(len(self.seen_urls)),
+                }
+
+                if self.category:
+                    formdata["category"] = self.category
+
+                parsed_base = urlparse(DOU_UA_URL)
+                query_string = (
+                    f"?{parsed_base.query}" if parsed_base.query else ""
+                )
+
                 yield scrapy.FormRequest(
-                    url="https://jobs.dou.ua/vacancies/xhr-load/",
-                    formdata={
-                        "csrfmiddlewaretoken": csrf_token,
-                        "count": str(len(self.seen_urls)),
-                    },
+                    url=f"https://jobs.dou.ua/vacancies/xhr-load/{query_string}",
+                    formdata=formdata,
                     headers={
                         "X-Requested-With": "XMLHttpRequest",
-                        "Referer": response.url,
+                        "Referer": DOU_UA_URL,
                     },
                     meta={"csrf_token": csrf_token},
                     callback=self.parse,
@@ -79,8 +93,6 @@ class DouUaSpider(scrapy.Spider):
 
         except Exception as e:
             logger.error(f"Error extracting job: {e}")
-
-        logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
 
     @staticmethod
     def parse_job_details(response):
@@ -106,3 +118,6 @@ class DouUaSpider(scrapy.Spider):
             RawJobColumns.DATE_POSTED: date_posted,
             RawJobColumns.URL: response.url,
         }
+
+    def closed(self, reason):
+        logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
