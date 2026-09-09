@@ -1,4 +1,5 @@
 import json
+import re
 from urllib.parse import urlparse, parse_qs
 
 import scrapy
@@ -33,6 +34,13 @@ class DouUaSpider(scrapy.Spider):
             jobs = response.css("li.l-vacancy")
 
         return jobs
+
+    @staticmethod
+    def clean_text(text: str | None) -> str:
+        if not text:
+            return ""
+        # Normalize NBSP symbols, spaces
+        return re.sub(r"[\s\xa0]+", " ", text).strip()
 
     def parse(self, response):
         try:
@@ -94,8 +102,7 @@ class DouUaSpider(scrapy.Spider):
         except Exception as e:
             logger.error(f"Error extracting job: {e}")
 
-    @staticmethod
-    def parse_job_details(response):
+    def parse_job_details(self, response):
         title = response.meta.get("title", "No title")
         company_name = response.meta.get("company_name", "No company")
 
@@ -106,16 +113,16 @@ class DouUaSpider(scrapy.Spider):
             "div.b-typo.vacancy-section ul li::text"
         ).getall()
 
-        full_description = description + ul_items
+        raw_description = " ".join(description + ul_items)
         location = response.css("span.place.bi.bi-geo-alt-fill::text").get()
         date_posted = response.css("div.date::text").get()
 
         yield {
-            RawJobColumns.TITLE: title,
-            RawJobColumns.COMPANY_NAME: company_name,
-            RawJobColumns.DESCRIPTION: full_description,
-            RawJobColumns.LOCATION: location,
-            RawJobColumns.DATE_POSTED: date_posted,
+            RawJobColumns.TITLE: self.clean_text(title),
+            RawJobColumns.COMPANY_NAME: self.clean_text(company_name),
+            RawJobColumns.DESCRIPTION: self.clean_text(raw_description),
+            RawJobColumns.LOCATION: self.clean_text(location),
+            RawJobColumns.DATE_POSTED: self.clean_text(date_posted),
             RawJobColumns.URL: response.url,
         }
 
