@@ -1,6 +1,7 @@
 import json
 import re
 from urllib.parse import urlparse, parse_qs
+import time
 
 import scrapy
 
@@ -17,6 +18,7 @@ class DouUaSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.seen_urls = set()
+        self.start_time = time.time()
         parsed_url = urlparse(DOU_UA_URL)
         query_params = parse_qs(parsed_url.query)
         self.category = query_params.get("category", [None])[0]
@@ -128,3 +130,9 @@ class DouUaSpider(scrapy.Spider):
 
     def closed(self, reason):
         logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
+        total_time = time.time() - self.start_time
+        avg_per_job = (
+            total_time / len(self.seen_urls) if len(self.seen_urls) else 0
+        )
+        logger.info(f"Total Time    : {total_time:.2f}s")
+        logger.info(f"Avg/Job Time  : {avg_per_job:.2f}s")
