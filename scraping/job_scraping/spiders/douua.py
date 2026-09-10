@@ -91,7 +91,10 @@ class DouUaSpider(scrapy.Spider):
                 )
 
                 yield scrapy.FormRequest(
-                    url=f"https://jobs.dou.ua/vacancies/xhr-load/{query_string}",
+                    url=(
+                        "https://jobs.dou.ua/vacancies/xhr-load/"
+                        f"{query_string}"
+                    ),
                     formdata=formdata,
                     headers={
                         "X-Requested-With": "XMLHttpRequest",
