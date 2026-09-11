@@ -12,20 +12,23 @@ from logger import logger
 from utils import log_line_break
 
 
-def plot_tech_counts(analysis_output_file: str) -> None:
-    tech_counts = pd.read_csv(analysis_output_file)
-    top_tech_counts = tech_counts.sort_values(
-        by="Count", ascending=False
-    ).head(TECHNOLOGIES_TO_DISPLAY)
+def visualize_jobs() -> None:
+    log_line_break()
+    logger.info("Starting visualization...")
+
+    if not os.path.exists(ANALYSIS_OUTPUT_FILE):
+        logger.error(f"Analysis file not found at: {ANALYSIS_OUTPUT_FILE}")
+        return
+    tech_counts = pd.read_csv(ANALYSIS_OUTPUT_FILE).head(
+        TECHNOLOGIES_TO_DISPLAY
+    )
 
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.set_facecolor("#D9D9D9")
     plt.bar(
-        top_tech_counts["Technology"],
-        top_tech_counts["Count"],
-        color=plt.cm.ocean(
-            top_tech_counts["Count"] / top_tech_counts["Count"].max()
-        ),
+        tech_counts["Technology"],
+        tech_counts["Count"],
+        color=plt.cm.ocean(tech_counts["Count"] / tech_counts["Count"].max()),
     )
 
     plt.title(
@@ -40,14 +43,7 @@ def plot_tech_counts(analysis_output_file: str) -> None:
     plt.savefig(VISUALIZATION_OUTPUT_FILE)
     logger.info(f"Plot saved to {VISUALIZATION_OUTPUT_FILE}")
 
-    plt.show()
-
-
-def visualize_jobs():
-    log_line_break()
-    logger.info("Starting visualization...")
-
-    plot_tech_counts(ANALYSIS_OUTPUT_FILE)
-
     logger.info("Finished visualization.")
     log_line_break()
+
+    plt.show()
