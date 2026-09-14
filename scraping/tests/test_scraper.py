@@ -1,8 +1,11 @@
 import json
+from unittest.mock import patch, MagicMock
 
+import pytest
 import scrapy
 from scrapy.http import HtmlResponse, TextResponse
 from scraping.job_scraping.spiders.douua import DouUaSpider
+from scraping.scraper import scrape_jobs
 
 
 def test_dou_clean_text():
@@ -123,3 +126,28 @@ def test_dou_parse_job_details():
     assert item["location"] == "Kyiv"
     assert item["date_posted"] == "14 September 2026"
     assert item["url"] == "https://jobs.dou.ua/vacancies/100/"
+
+
+@patch("scraping.scraper.CrawlerProcess")
+def test_scrape_jobs_success(mock_crawler_process):
+    mock_process_instance = MagicMock()
+    mock_crawler_process.return_value = mock_process_instance
+
+    scrape_jobs()
+
+    mock_crawler_process.assert_called_once()
+    mock_process_instance.crawl.assert_called_once()
+    mock_process_instance.start.assert_called_once()
+
+
+@patch("scraping.scraper.CrawlerProcess")
+def test_scrape_jobs_failure(mock_crawler_process):
+    mock_process_instance = MagicMock()
+    mock_process_instance.start.side_effect = Exception("Request failed")
+    mock_crawler_process.return_value = mock_process_instance
+
+    with pytest.raises(SystemExit) as exc_info:
+        scrape_jobs()
+
+    assert exc_info.value.code == 1
+    mock_process_instance.start.assert_called_once()

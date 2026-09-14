@@ -1,0 +1,11 @@
+[tool.coverage.run]
+omit = [
+    "scraping/job_scraping/middlewares.py",
+    "scraping/job_scraping/settings.py",
+    "scraping/job_scraping/items.py",
+    "scraping/job_scraping/pipelines.py",
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
