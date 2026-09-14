@@ -1,9 +1,12 @@
 import json
 import re
+from typing import Sequence
 from urllib.parse import urlparse, parse_qs
 import time
 
 import scrapy
+from scrapy import Selector
+from scrapy.http import Response
 
 from config import DOU_UA_URL, RawJobColumns, MAX_ITEMS_TO_SCRAPE, Scraper
 from logger import logger
@@ -24,18 +27,15 @@ class DouUaSpider(scrapy.Spider):
         self.category = query_params.get("category", [None])[0]
 
     @staticmethod
-    def get_jobs_data(response) -> dict:
+    def get_jobs_data(response: Response) -> Sequence[Selector]:
         try:
             data = json.loads(response.text)
             html = data.get("html", "")
-            from scrapy import Selector
 
             sel = Selector(text=html)
-            jobs = sel.css("li.l-vacancy")
+            return sel.css("li.l-vacancy")
         except json.JSONDecodeError:
-            jobs = response.css("li.l-vacancy")
-
-        return jobs
+            return response.css("li.l-vacancy")
 
     @staticmethod
     def clean_text(text: str | None) -> str:
