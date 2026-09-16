@@ -6,34 +6,35 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-from config import SCRAPING_OUTPUT_FILE
+from config import SCRAPING_OUTPUT_FILE, LOGGER_LEVEL
 
 BOT_NAME = "job_scraping"
 
 SPIDER_MODULES = ["scraping.job_scraping.spiders"]
 NEWSPIDER_MODULE = "scraping.job_scraping.spiders"
 
-FEED_FORMAT = "csv"
-FEED_URI = SCRAPING_OUTPUT_FILE
-FEED_OVERWRITE = True
+LOG_ENABLED = False
+LOG_LEVEL = LOGGER_LEVEL
 
+# https://www.geeksforgeeks.org/python/scrapy-feed-exports/
+FEEDS = {SCRAPING_OUTPUT_FILE: {"format": "csv", "overwrite": True}}
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "job_scraping (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 0.2
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 # DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 8
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)

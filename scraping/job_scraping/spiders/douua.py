@@ -1,71 +1,111 @@
+import json
+import re
+from typing import Sequence
+from urllib.parse import urlparse, parse_qs
 import time
 
 import scrapy
-from selenium import webdriver
-from selenium.common import NoSuchElementException, TimeoutException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-from webdriver_manager.chrome import ChromeDriverManager
+from scrapy import Selector
+from scrapy.http import Response
 
-from config import DOUUA_URL
+from config import DOU_UA_URL, RawJobColumns, MAX_ITEMS_TO_SCRAPE, Scraper
+from logger import logger
 
 
-class DouuaSpider(scrapy.Spider):
-    name = "douua"
-    allowed_domains = ["dou.ua"]
-    start_urls = [DOUUA_URL]
+class DouUaSpider(scrapy.Spider):
+    name = "dou_ua"
+    allowed_domains = ["dou.ua", "jobs.dou.ua"]
+    start_urls = [DOU_UA_URL]
+    limit = MAX_ITEMS_TO_SCRAPE[Scraper.DOU_UA]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.seen_urls = set()
+        self.start_time = time.time()
+        parsed_url = urlparse(DOU_UA_URL)
+        query_params = parse_qs(parsed_url.query)
+        self.category = query_params.get("category", [None])[0]
 
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
+    @staticmethod
+    def get_jobs_data(response: Response) -> Sequence[Selector]:
+        try:
+            data = json.loads(response.text)
+            html = data.get("html", "")
 
-        self.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=chrome_options,
-        )
+            sel = Selector(text=html)
+            return sel.css("li.l-vacancy")
+        except json.JSONDecodeError:
+            return response.css("li.l-vacancy")
+
+    @staticmethod
+    def clean_text(text: str | None) -> str:
+        if not text:
+            return ""
+        # Normalize NBSP symbols, spaces
+        return re.sub(r"[\s\xa0]+", " ", text).strip()
 
     def parse(self, response):
-        self.driver.get(DOUUA_URL)
-
-        while True:
-            jobs = self.driver.find_elements(By.CSS_SELECTOR, ".l-vacancy")
-            load_more_btn = WebDriverWait(self.driver, 10).until(
-                ec.element_to_be_clickable(
-                    (By.XPATH, "//a[contains(text(),'Більше вакансій')]")
-                )
-            )
-            self.driver.execute_script(
-                "arguments[0].scrollIntoView(true);", load_more_btn
-            )
-            time.sleep(1)
-            load_more_btn.click()
-
+        try:
+            jobs = self.get_jobs_data(response)
             for job in jobs:
-                try:
-                    title = job.find_element(By.CSS_SELECTOR, "a.vt").text
-                    company_name = job.find_element(
-                        By.CSS_SELECTOR, "a.company"
-                    ).text
-                    job_url = job.find_element(
-                        By.CSS_SELECTOR, "a.vt"
-                    ).get_attribute("href")
+                if len(self.seen_urls) >= self.limit:
+                    return
+                job_url = job.css("a.vt::attr(href)").get()
+                title = job.css("a.vt::text").get()
+                company_name = job.css("a.company::text").get()
 
-                    yield response.follow(
-                        job_url,
-                        callback=self.parse_job_details,
-                        meta={"title": title, "company_name": company_name},
-                    )
-                except NoSuchElementException as e:
-                    print(f"Element not found: {e}")
-                except TimeoutException as e:
-                    print(f"Timeout error: {e}")
-                except Exception as e:
-                    print(f"Error extracting job: {e}")
+                if job_url in self.seen_urls:
+                    continue
+                self.seen_urls.add(job_url)
+
+                yield response.follow(
+                    job_url,
+                    callback=self.parse_job_details,
+                    meta={"title": title, "company_name": company_name},
+                )
+
+            # simulate clicking button through a request
+            csrf_token = response.meta.get("csrf_token")
+
+            if not csrf_token:
+                # Only try CSS if it's the first run on HTML page
+                try:
+                    csrf_token = response.css(
+                        "input[name='csrfmiddlewaretoken']::attr(value)"
+                    ).get()
+                except ValueError:
+                    csrf_token = response.cookies.get("csrftoken")
+
+            if csrf_token and len(self.seen_urls) < self.limit:
+                formdata = {
+                    "csrfmiddlewaretoken": csrf_token,
+                    "count": str(len(self.seen_urls)),
+                }
+
+                if self.category:
+                    formdata["category"] = self.category
+
+                parsed_base = urlparse(DOU_UA_URL)
+                query_string = (
+                    f"?{parsed_base.query}" if parsed_base.query else ""
+                )
+
+                yield scrapy.FormRequest(
+                    url=(
+                        "https://jobs.dou.ua/vacancies/xhr-load/"
+                        f"{query_string}"
+                    ),
+                    formdata=formdata,
+                    headers={
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Referer": DOU_UA_URL,
+                    },
+                    meta={"csrf_token": csrf_token},
+                    callback=self.parse,
+                )
+
+        except Exception as e:
+            logger.error(f"Error extracting job: {e}")
 
     def parse_job_details(self, response):
         title = response.meta.get("title", "No title")
@@ -78,15 +118,24 @@ class DouuaSpider(scrapy.Spider):
             "div.b-typo.vacancy-section ul li::text"
         ).getall()
 
-        full_description = description + ul_items
+        raw_description = " ".join(description + ul_items)
         location = response.css("span.place.bi.bi-geo-alt-fill::text").get()
         date_posted = response.css("div.date::text").get()
 
         yield {
-            "title": title,
-            "company_name": company_name,
-            "description": full_description,
-            "location": location,
-            "date_posted": date_posted,
-            "url": response.url,
+            RawJobColumns.TITLE: self.clean_text(title),
+            RawJobColumns.COMPANY_NAME: self.clean_text(company_name),
+            RawJobColumns.DESCRIPTION: self.clean_text(raw_description),
+            RawJobColumns.LOCATION: self.clean_text(location),
+            RawJobColumns.DATE_POSTED: self.clean_text(date_posted),
+            RawJobColumns.URL: response.url,
         }
+
+    def closed(self, reason):
+        logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
+        total_time = time.time() - self.start_time
+        avg_per_job = (
+            total_time / len(self.seen_urls) if len(self.seen_urls) else 0
+        )
+        logger.info(f"Total Time    : {total_time:.2f}s")
+        logger.info(f"Avg/Job Time  : {avg_per_job:.2f}s")

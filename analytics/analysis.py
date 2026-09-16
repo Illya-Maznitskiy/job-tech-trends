@@ -4,20 +4,18 @@ import re
 from pathlib import Path
 
 import pandas as pd
-import nltk
 from collections import Counter
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 
-from config import TECHNOLOGIES_TO_ANALYZE
+from config import (
+    TECHNOLOGIES_TO_ANALYZE,
+    SCRAPING_OUTPUT_FILE,
+    ANALYSIS_OUTPUT_FILE,
+)
+from logger import logger
+from utils import log_line_break
 
-nltk.download("stopwords")
-nltk.download("punkt")
 
-STOPWORDS = set(stopwords.words("english"))
-
-
-def load_data(folder_path):
+def get_job_descriptions(folder_path: str) -> list[str]:
     return [
         row["description"]
         for file in Path(folder_path).glob("*.csv")
@@ -26,71 +24,48 @@ def load_data(folder_path):
     ]
 
 
-def preprocess_text(text):
-    text = text.lower()
-    text = re.sub(r"[^\w\s]", "", text)
-    words = word_tokenize(text)
-    words = [word for word in words if word not in STOPWORDS]
-    return words
-
-
-def count_technologies(job_descriptions):
+def count_technologies(job_descriptions: list[str]) -> dict[str, int]:
     word_counts = Counter()
 
     for desc in job_descriptions:
-        words = set(preprocess_text(desc))
-        word_counts.update(words)
+        desc_lower = desc.lower()
+        vacancy_techs = set()
 
-    tech_frequencies = {
-        tech: word_counts[tech.lower()]
-        for tech in TECHNOLOGIES_TO_ANALYZE
-        if tech.lower() in word_counts
-    }
-    return tech_frequencies
+        for base_name_tech, aliases in TECHNOLOGIES_TO_ANALYZE.items():
+            for alias in aliases:
+                pattern = (
+                    r"(?<![a-z0-9/-])"
+                    + re.escape(alias.lower())
+                    + r"(?![a-z0-9/-])"
+                )
+                if re.search(pattern, desc_lower):
+                    vacancy_techs.add(base_name_tech)
+                    break  # Count tech ONCE per job
+
+        word_counts.update(vacancy_techs)
+
+    return {tech: count for tech, count in word_counts.items() if count > 0}
 
 
-def save_results(counts, output_path):
+def save_results(counts: dict[str:int], output_path: str) -> None:
     df = pd.DataFrame(counts.items(), columns=["Technology", "Count"])
     df.sort_values(by="Count", ascending=False, inplace=True)
     df.to_csv(output_path, index=False)
-
-    last_few_dirs = os.path.normpath(output_path).split(os.sep)[-3:]
-    last_few_dirs_str = os.sep.join(last_few_dirs)
-    print(f"Results saved to {last_few_dirs_str}")
+    logger.info(f"Results saved to {output_path}")
 
 
-def analyze_technologies():
-    print("\nStarting analysis...\n")
+def analyze_technologies() -> None:
+    log_line_break()
+    logger.info("Starting analysis...")
 
-    current_script_dir = os.path.dirname(os.path.realpath(__file__))
-
-    data_folder = os.path.join(current_script_dir, "../scraping/data/")
-    absolute_data_path = os.path.abspath(data_folder)
-
-    if not os.path.exists(absolute_data_path):
-        print(f"Checking data folder path: {absolute_data_path}")
-        print("ERROR: Data folder does not exist!")
+    if not os.path.exists(SCRAPING_OUTPUT_FILE):
+        logger.error(f"Scraped data file not found at: {SCRAPING_OUTPUT_FILE}")
         return
-    else:
-        print("Data folder found, proceeding...")
 
-    output_folder = os.path.join(current_script_dir, "data")
-
-    if not os.path.exists(output_folder):
-        print(f"Checking output folder path: {output_folder}")
-        print("ERROR: Output folder does not exist! Creating it...")
-        os.makedirs(output_folder)
-    else:
-        print("Output folder found, proceeding...")
-
-    output_file = os.path.join(output_folder, "tech_counts.csv")
-    descriptions = load_data(absolute_data_path)
+    os.makedirs(os.path.dirname(ANALYSIS_OUTPUT_FILE), exist_ok=True)
+    descriptions = get_job_descriptions(os.path.dirname(SCRAPING_OUTPUT_FILE))
     tech_counts = count_technologies(descriptions)
 
-    save_results(tech_counts, output_file)
+    save_results(tech_counts, ANALYSIS_OUTPUT_FILE)
 
-    print("\nAnalysing finished.\n")
-
-
-if __name__ == "__main__":
-    analyze_technologies()
+    logger.info("Analysing finished.")
