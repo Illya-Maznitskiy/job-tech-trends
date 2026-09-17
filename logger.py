@@ -16,6 +16,7 @@ logging.getLogger("asyncio").setLevel(LOGGER_LEVEL)
 logging.getLogger("selenium").setLevel(LOGGER_LEVEL)
 logging.getLogger("urllib3").setLevel(LOGGER_LEVEL)
 logging.getLogger("PIL").setLevel(LOGGER_LEVEL)
+logging.getLogger("httpcore").setLevel(LOGGER_LEVEL)
 
 
 file_handler = RotatingFileHandler(

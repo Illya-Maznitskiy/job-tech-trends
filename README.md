@@ -7,6 +7,7 @@ Analyze and visualize the most in-demand technologies in the job market.
 
 ## Technologies Used
 - Python
+- AI integration
 - Scrapy
 - Pytest
 - Pandas
@@ -16,7 +17,7 @@ Analyze and visualize the most in-demand technologies in the job market.
 
 ## Features
 - Scrape data from job platforms.
-- Analyze main technologies words from description.
+- Analyze main technologies words from description with Gemini AI.
 - Create visualization of most essential technologies.
 
 
@@ -32,12 +33,18 @@ pip install -r requirements.txt
 ```
 
 
+## Check .env.example
+Check [.env.example](.env.example) file  
+Create your .env file and set vars by their simple guide
+
+
 ## Run the app
 Open the terminal and use the following command:  
 (Average execution time: ~0.3 s / job)
 ```bash
 python main.py
 ```
+Note: Google AI models can make mistakes, so double-check responses before relying on, publishing, or otherwise using generated content.
 
 
 ## Testing
