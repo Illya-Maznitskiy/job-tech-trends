@@ -67,14 +67,14 @@ class DouUaSpider(scrapy.Spider):
             # simulate clicking button through a request
             csrf_token = response.meta.get("csrf_token")
 
+            # if the first request, get the csrf token from the response
             if not csrf_token:
-                # Only try CSS if it's the first run on HTML page
-                try:
-                    csrf_token = response.css(
-                        "input[name='csrfmiddlewaretoken']::attr(value)"
-                    ).get()
-                except ValueError:
-                    csrf_token = response.cookies.get("csrftoken")
+                payload = response.text
+                match = re.search(
+                    r'window\.CSRF_TOKEN\s*=\s*["\']([^"\']+)["\'];', payload
+                )
+                if match:
+                    csrf_token = match.group(1)
 
             if csrf_token and len(self.seen_urls) < self.limit:
                 formdata = {
