@@ -19,6 +19,13 @@ def analyze_market_with_ai() -> str | None:
         )
         return None
 
+    models = [
+        "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.5-flash",
+        "gemini-2.5-flash",
+    ]
+
     client = genai.Client(api_key=api_key)
     data = pandas.read_csv(ANALYSIS_OUTPUT_FILE)
     clean_data = data.head(30).to_string(index=False)
@@ -29,16 +36,20 @@ def analyze_market_with_ai() -> str | None:
         "1. Concise career advice in exactly 3 simple sentences.\n"
         "2. Top 3 career fields to target based on demand.\n\n"
         f"Data:\n{clean_data}"
-        f"Data source: {DOU_UA_URL}"
+        f"\nData source: {DOU_UA_URL}"
     )
 
-    try:
-        response = client.interactions.create(
-            model="gemini-3.5-flash",
-            input=prompt,
-            timeout=30,
-        )
-        return response.output_text
-    except Exception as e:
-        logger.exception(f"Error calling Gemini API: {e}")
-        return None
+    for model in models:
+        logger.info(f"Analyzing data with {model} model...")
+        try:
+            response = client.interactions.create(
+                model=model,
+                input=prompt,
+                timeout=30,
+            )
+            return response.output_text
+        except Exception as e:
+            logger.warning(f"Error calling Gemini API: {e}")
+            continue
+
+    return None

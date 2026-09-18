@@ -70,6 +70,6 @@ def analyze_technologies() -> None:
     save_results(tech_counts, ANALYSIS_OUTPUT_FILE)
 
     ai_summary = analyze_market_with_ai()
-    logger.info(f"AI analysis: {ai_summary}")
+    logger.info(f"AI analysis: {ai_summary}\n")
 
     logger.info("Analysing finished.")
