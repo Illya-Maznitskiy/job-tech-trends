@@ -23,7 +23,6 @@ def analyze_market_with_ai() -> str | None:
         "gemini-3.8-flash",
         "gemini-3.7-flash",
         "gemini-3.5-flash",
-        "gemini-2.5-flash",
     ]
 
     client = genai.Client(api_key=api_key)
