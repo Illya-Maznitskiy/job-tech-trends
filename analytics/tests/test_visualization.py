@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pandas as pd
 
@@ -21,6 +21,9 @@ def test_visualize_jobs_generates_png(monkeypatch, tmp_path):
         "analytics.visualization.VISUALIZATION_OUTPUT_FILE", str(output_png)
     )
 
+    mock_report = MagicMock()
+    monkeypatch.setattr("analytics.visualization.generate_report", mock_report)
+
     with patch("matplotlib.pyplot.show"):
         visualize_jobs()
 
@@ -38,6 +41,8 @@ def test_visualize_jobs_handles_missing_file(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "analytics.visualization.VISUALIZATION_OUTPUT_FILE", str(output_png)
     )
+    mock_report = MagicMock()
+    monkeypatch.setattr("analytics.visualization.generate_report", mock_report)
 
     visualize_jobs()
 
