@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../data/favicon.ico">
+    <title>Job Tech Trends</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--muted); margin-bottom: 3rem; font-size: 1.25rem; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .badge {
+            background: #eff6ff;
+            color: var(--accent);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .metric {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric .value { font-size: 1.5rem; font-weight: 700; }
+        .metric .label { font-size: 0.8rem; color: var(--muted); }
+
+        .highlight {
+            background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            font-weight: 500;
+        }
+
+        .chart-wrap {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .chart-wrap img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .ai-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.25rem;
+            white-space: pre-line;
+            line-height: 1.7;
+        }
+        footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Job Tech Trends Report</h1>
+    <p class="subtitle">Automated analysis 🤖</p>
+
+    <div class="card">
+        <h2>Key Job Tech Trends <span class="badge">📈</span></h2>
+        <div class="metrics">
+            <div class="metric">
+                <div class="value">150</div>
+                <div class="label">Total Jobs Scraped</div>
+            </div>
+            <div class="metric">
+                <div class="value">23-09-2026</div>
+                <div class="label">Report Date</div>
+            </div>
+            <div class="metric">
+                <div class="value">https://jobs.dou.ua/vacancies/?category=Python</div>
+                <div class="label">Source</div>
+            </div>
+        </div>
+        <div class="highlight">
+            #1 Skill: <strong>python</strong> — 129 mentions
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Skill Demand Breakdown</h2>
+        <div class="chart-wrap">
+            <img src="tech_counts_plot.png" alt="Skill distribution bar chart">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Gemini AI Market Strategy & Target Roles</h2>
+        <div class="ai-box">None</div>
+    </div>
+
+    <footer>Thanks for visiting 😋</footer>
+</div>
+</body>
+</html>

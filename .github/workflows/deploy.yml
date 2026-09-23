@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/gemini-aia-integration
   pull_request:
     branches:
       - main
@@ -32,3 +33,21 @@ jobs:
 
       - name: Run Pytest
         run: pytest
+
+
+  deploy:
+    name: Deploy Static Dashboard to GitHub Pages
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'analytics/data/'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

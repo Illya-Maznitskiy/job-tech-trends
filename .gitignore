@@ -23,7 +23,6 @@
 # User-specific stuff
 output/
 *.csv
-/analytics/data/tech_counts_plot.png
 
 .idea/
 .idea/**/workspace.xml
@@ -319,5 +318,3 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,git,venv
-
-analytics/data/index.html
