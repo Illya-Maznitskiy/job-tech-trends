@@ -20,8 +20,7 @@ def test_get_report_data_structure(monkeypatch):
         "total_jobs",
         "run_date",
         "scraped_url",
-        "top_skill",
-        "top_skill_count",
+        "top_skills",
         "ai_summary",
         "plot_filename",
     }

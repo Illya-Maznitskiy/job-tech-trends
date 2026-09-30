@@ -98,6 +98,17 @@
             font-weight: 500;
             overflow-wrap: anywhere;
         }
+        .highlight ol {
+            margin: 0.5rem 0 0 1.25rem;
+            font-weight: 400;
+        }
+        .highlight li { margin-bottom: 0.25rem; }
+        .skill-name {
+            font-weight: 700;
+            text-transform: capitalize;
+            letter-spacing: 0.03em;
+            color: var(--primary);
+        }
 
         .chart-wrap {
             text-align: center;
@@ -171,7 +182,12 @@
             </div>
         </div>
         <div class="highlight">
-            #1 Skill: <strong>{{ top_skill }}</strong> — {{ top_skill_count }} mentions
+            <strong>Top Skills:</strong>
+            <ol>
+            {% for skill in top_skills %}
+                <li><span class="skill-name">{{ skill.Technology }}</span> — {{ skill.Count }} mentions</li>
+            {% endfor %}
+            </ol>
         </div>
     </div>
 

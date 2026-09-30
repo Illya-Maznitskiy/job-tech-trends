@@ -26,8 +26,7 @@ def get_report_data() -> dict:
     total_jobs = len(pandas.read_csv(SCRAPING_OUTPUT_FILE))
     run_date = datetime.now().strftime("%d-%m-%Y")
     scraped_url = DOU_UA_URL
-    top_skill = output_data.iloc[0]["Technology"]
-    top_skill_count = output_data.iloc[0]["Count"]
+    top_skills = output_data.head(3).to_dict("records")
     ai_summary = analyze_market_with_ai()
     plot_filename = Path(VISUALIZATION_OUTPUT_FILE).name
 
@@ -35,8 +34,7 @@ def get_report_data() -> dict:
         "total_jobs": total_jobs,
         "run_date": run_date,
         "scraped_url": scraped_url,
-        "top_skill": top_skill,
-        "top_skill_count": top_skill_count,
+        "top_skills": top_skills,
         "ai_summary": ai_summary,
         "plot_filename": plot_filename,
     }
