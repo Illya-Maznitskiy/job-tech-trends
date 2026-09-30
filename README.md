@@ -1,6 +1,9 @@
 # Job Tech Trends
 
 
+**[Live demo! 🚀](https://illya-maznitskiy.github.io/job-tech-trends/)**
+
+
 ## Description
 Analyze and visualize the most in-demand technologies in the job market.
 
