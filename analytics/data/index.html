@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="../data/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Job Tech Trends</title>
     <style>
         :root {
@@ -15,6 +15,7 @@
             --border: #e2e8f0;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -33,6 +34,14 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
+        }
+        .card.show { opacity: 1; transform: translateY(0); }
+        .card.show:hover {
+            box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+            transform: translateY(-3px);
         }
         .card h2 {
             font-size: 1.1rem;
@@ -51,19 +60,35 @@
         }
 
         .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 1rem;
             margin-bottom: 1.25rem;
         }
         .metric {
             background: #f1f5f9;
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             text-align: center;
+            flex: 1 1 160px;
+            max-width: 220px;
+            transition: background-color 0.2s ease;
         }
-        .metric .value { font-size: 1.5rem; font-weight: 700; }
-        .metric .label { font-size: 0.8rem; color: var(--muted); }
+        .metric:hover { background: #e8eef5; }
+        .metric .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        .metric .value a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--accent);
+        }
+        .metric .value a:hover { color: var(--accent); }
+        .metric .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
 
         .highlight {
             background: linear-gradient(135deg, #eff6ff, #f0f9ff);
@@ -71,6 +96,7 @@
             padding: 1rem 1.25rem;
             border-radius: 0 8px 8px 0;
             font-weight: 500;
+            overflow-wrap: anywhere;
         }
 
         .chart-wrap {
@@ -90,13 +116,37 @@
             padding: 1.25rem;
             white-space: pre-line;
             line-height: 1.7;
+            overflow-wrap: anywhere;
         }
+        .ai-box strong { color: var(--primary); }
+        .ai-box .unavailable { color: var(--muted); font-style: italic; }
+
         footer {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
             color: var(--muted);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             margin-top: 2rem;
         }
+        .gh-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+        .gh-link:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .gh-link svg { width: 16px; height: 16px; fill: currentColor; }
     </style>
 </head>
 <body>
@@ -108,20 +158,20 @@
         <h2>Key Job Tech Trends <span class="badge">📈</span></h2>
         <div class="metrics">
             <div class="metric">
-                <div class="value">100</div>
+                <div class="value">146</div>
                 <div class="label">Total Jobs Scraped</div>
             </div>
             <div class="metric">
-                <div class="value">25-09-2026</div>
+                <div class="value">30-09-2026</div>
                 <div class="label">Report Date</div>
             </div>
             <div class="metric">
-                <div class="value">https://jobs.dou.ua/vacancies/?category=Python</div>
+                <div class="value"><a href="https://jobs.dou.ua/vacancies/?category=Python" target="_blank" rel="noopener" title="https://jobs.dou.ua/vacancies/?category=Python">jobs.dou.ua</a></div>
                 <div class="label">Source</div>
             </div>
         </div>
         <div class="highlight">
-            #1 Skill: <strong>python</strong> — 91 mentions
+            #1 Skill: <strong>python</strong> — 128 mentions
         </div>
     </div>
 
@@ -134,18 +184,33 @@
 
     <div class="card">
         <h2>Gemini AI Market Strategy & Target Roles</h2>
-        <div class="ai-box">**Career Advice:**
-1. Master Python alongside modern API frameworks like FastAPI and relational databases like PostgreSQL.
-2. Build strong cloud-native skills by learning containerization with Docker and deployment using AWS and CI/CD pipelines.
-3. Integrate practical AI and machine learning capabilities into your projects to capture the fastest-growing market demand.
+        <div class="ai-box">### 1. Career Advice
+1. Build a strong foundation in Python backend development focusing on FastAPI and PostgreSQL. 
+2. Boost your market value by mastering containerization with Docker and cloud deployment on AWS. 
+3. Integrate AI and machine learning capabilities into your skill set to capitalize on booming industry demand.
 
-**Top 3 Career Fields to Target:**
-1. **Python Backend Engineering** (driven by high demand for Python, PostgreSQL, REST, and FastAPI)
-2. **AI / Machine Learning Engineering** (driven by the massive surge in AI and ML requirements)
-3. **Cloud & DevOps Engineering** (driven by heavy emphasis on Docker, CI/CD, AWS, and Kubernetes)</div>
+---
+
+### 2. Top 3 Career Fields to Target
+1. **Python Backend Engineering** (Driven by: *Python, PostgreSQL, FastAPI, REST, Redis*)
+2. **AI / Machine Learning Engineering** (Driven by: *AI, Python, ML*)
+3. **Cloud & DevOps Engineering** (Driven by: *Docker, CI/CD, AWS, Kubernetes, GCP*)</div>
     </div>
 
-    <footer>Thanks for visiting 😋</footer>
+    <footer>
+        <a class="gh-link" href="https://github.com/Illya-Maznitskiy/job-tech-trends" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+        </a>
+        <span>Thanks for visiting 😋</span>
+    </footer>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".card").forEach((card, i) => {
+            setTimeout(() => card.classList.add("show"), i * 120);
+        });
+    });
+</script>
 </body>
 </html>
