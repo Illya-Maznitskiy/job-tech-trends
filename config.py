@@ -29,6 +29,7 @@ DOU_UA_URL = "https://jobs.dou.ua/vacancies/?category=Python"
 SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"
 ANALYSIS_OUTPUT_FILE = "analytics/data/tech_counts.csv"
 VISUALIZATION_OUTPUT_FILE = "analytics/data/tech_counts_plot.png"
+HTML_PAGE_OUTPUT_FILE = "analytics/data/index.html"
 
 TECHNOLOGIES_TO_DISPLAY = 20
 

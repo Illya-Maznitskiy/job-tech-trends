@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from analytics.report_generator import generate_report
 from config import (
     ANALYSIS_OUTPUT_FILE,
     VISUALIZATION_OUTPUT_FILE,
@@ -44,6 +45,5 @@ def visualize_jobs() -> None:
     logger.info(f"Plot saved to {VISUALIZATION_OUTPUT_FILE}")
 
     logger.info("Finished visualization.")
-    log_line_break()
 
-    plt.show()
+    generate_report()

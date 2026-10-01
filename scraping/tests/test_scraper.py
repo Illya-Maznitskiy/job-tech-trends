@@ -54,7 +54,7 @@ def test_dou_parse_yields_requests_and_pagination():
     html = """
     <html>
         <body>
-            <input name="csrfmiddlewaretoken" value="test_csrf_token_123" />
+            <script>window.CSRF_TOKEN = "test_csrf_token_123";</script>
             <li class="l-vacancy">
                 <a class="vt"
                 href="https://jobs.dou.ua/vacancies/100/">Python Engineer</a>

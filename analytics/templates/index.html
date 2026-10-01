@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Job Tech Trends</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--muted); margin-bottom: 3rem; font-size: 1.25rem; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
+        }
+        .card.show { opacity: 1; transform: translateY(0); }
+        .card.show:hover {
+            box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+            transform: translateY(-3px);
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .badge {
+            background: #eff6ff;
+            color: var(--accent);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .metrics {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .metric {
+            background: #f1f5f9;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1 1 160px;
+            max-width: 220px;
+            transition: background-color 0.2s ease;
+        }
+        .metric:hover { background: #e8eef5; }
+        .metric .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        .metric .value a {
+            color: var(--primary);
+            text-decoration: none;
+            border-bottom: 1px dashed var(--accent);
+        }
+        .metric .value a:hover { color: var(--accent); }
+        .metric .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+
+        .highlight {
+            background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            font-weight: 500;
+            overflow-wrap: anywhere;
+        }
+        .highlight ol {
+            margin: 0.5rem 0 0 1.25rem;
+            font-weight: 400;
+        }
+        .highlight li { margin-bottom: 0.25rem; }
+        .skill-name {
+            font-weight: 700;
+            text-transform: capitalize;
+            letter-spacing: 0.03em;
+            color: var(--primary);
+        }
+
+        .chart-wrap {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .chart-wrap img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .ai-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.25rem;
+            white-space: pre-line;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+        .ai-box strong { color: var(--primary); }
+        .ai-box p { margin: 0 0 0.75rem; }
+        .ai-box p:last-child { margin-bottom: 0; }
+        .ai-box ol, .ai-box ul { margin: 0 0 0.75rem 1.25rem; }
+        .ai-box li { margin-bottom: 0.4rem; }
+        .ai-box h3, .ai-box h4 { margin: 1rem 0 0.25rem; color: var(--primary); }
+        .ai-box h3:first-child, .ai-box h4:first-child { margin-top: 0; }
+        .ai-box hr { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+        .ai-box .unavailable { color: var(--muted); font-style: italic; }
+
+        footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 2rem;
+        }
+        .gh-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+        .gh-link:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .gh-link svg { width: 16px; height: 16px; fill: currentColor; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Job Tech Trends Report</h1>
+    <p class="subtitle">Automated analysis 🤖</p>
+
+    <div class="card">
+        <h2>Market Overview <span class="badge">📈</span></h2>
+        <div class="metrics">
+            <div class="metric">
+                <div class="value">{{ total_jobs }}</div>
+                <div class="label">Total Jobs Scraped</div>
+            </div>
+            <div class="metric">
+                <div class="value">{{ run_date }}</div>
+                <div class="label">Report Date</div>
+            </div>
+            <div class="metric">
+                <div class="value"><a href="{{ scraped_url }}" target="_blank" rel="noopener" title="{{ scraped_url }}">{{ scraped_url.split('//')[-1].split('/')[0] }}</a></div>
+                <div class="label">Source</div>
+            </div>
+        </div>
+        <div class="highlight">
+            <strong>Top Skills:</strong>
+            <ol>
+            {% for skill in top_skills %}
+                <li><span class="skill-name">{{ skill.Technology }}</span> — {{ skill.Count }} mentions</li>
+            {% endfor %}
+            </ol>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Top Skills Chart</h2>
+        <div class="chart-wrap">
+            <img src="{{ plot_filename }}" alt="Skill distribution bar chart">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>AI Career Insights</h2>
+        <div class="ai-box">{% if ai_summary %}{{ ai_summary | safe }}{% else %}<span class="unavailable">AI summary unavailable (check GEMINI_API_KEY).</span>{% endif %}</div>
+    </div>
+
+    <footer>
+        <a class="gh-link" href="https://github.com/Illya-Maznitskiy/job-tech-trends" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+        </a>
+        <span>Thanks for visiting 😋</span>
+    </footer>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".card").forEach((card, i) => {
+            setTimeout(() => card.classList.add("show"), i * 120);
+        });
+    });
+</script>
+</body>
+</html>

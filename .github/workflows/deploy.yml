@@ -1,0 +1,57 @@
+name: Job Tech Trends CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - feat/gemini-ai-integration
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  pages: write
+
+jobs:
+  test:
+    name: Run Pytest & Flake8
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Flake8
+        run: flake8
+
+      - name: Run Pytest
+        run: pytest
+
+
+  deploy:
+    name: Deploy Static Dashboard to GitHub Pages
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'analytics/data/'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
