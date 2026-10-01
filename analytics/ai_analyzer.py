@@ -34,6 +34,10 @@ def analyze_market_with_ai() -> str | None:
         "technology frequencies and provide:\n"
         "1. Concise career advice in exactly 3 simple sentences.\n"
         "2. Top 3 career fields to target based on demand.\n\n"
+        "Format the entire response as clean HTML using only "
+        "<h4>, <p>, <strong>, <ol>, <li> and <ul> tags "
+        "(no markdown, no code fences, no <html>/<body> wrapper), "
+        "ready to be inserted directly into a webpage.\n\n"
         f"Data:\n{clean_data}"
         f"\nData source: {DOU_UA_URL}"
     )
