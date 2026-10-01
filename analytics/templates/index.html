@@ -173,7 +173,7 @@
     <p class="subtitle">Automated analysis 🤖</p>
 
     <div class="card">
-        <h2>Key Job Tech Trends <span class="badge">📈</span></h2>
+        <h2>Market Overview <span class="badge">📈</span></h2>
         <div class="metrics">
             <div class="metric">
                 <div class="value">{{ total_jobs }}</div>
@@ -199,14 +199,14 @@
     </div>
 
     <div class="card">
-        <h2>Skill Demand Breakdown</h2>
+        <h2>Top Skills Chart</h2>
         <div class="chart-wrap">
             <img src="{{ plot_filename }}" alt="Skill distribution bar chart">
         </div>
     </div>
 
     <div class="card">
-        <h2>Gemini AI Market Strategy & Target Roles</h2>
+        <h2>AI Career Insights</h2>
         <div class="ai-box">{% if ai_summary %}{{ ai_summary | safe }}{% else %}<span class="unavailable">AI summary unavailable (check GEMINI_API_KEY).</span>{% endif %}</div>
     </div>
 
