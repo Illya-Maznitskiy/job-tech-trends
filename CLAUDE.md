@@ -2,6 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+
 ## Commands
 
 ```bash
@@ -26,6 +27,7 @@ flake8
 
 Requires a `.env` file (see `.env.example`) with `GEMINI_API_KEY` for the AI analysis step.
 
+
 ## Architecture
 
 The pipeline runs as three sequential stages, orchestrated by `main.py`, each stage reading the previous stage's CSV output from disk (no in-memory handoff):
@@ -45,3 +47,11 @@ Tests live alongside each package (`scraping/tests/`, `analytics/tests/`). Exter
 ## CI/CD
 
 `.github/workflows/deploy.yml` runs flake8 + pytest on push/PR to `main` and `feat/gemini-ai-integration`, then deploys `analytics/data/` to GitHub Pages on `main`.
+
+
+# Strict rules
+
+- **ALWAYS run tests and linting after making changes.** Whenever you modify code, you must immediately run `pytest` and `flake8` to verify nothing is broken.
+- Never present or finalize a task as complete if pytest or flake8 throw errors. Fix them first.
+- **Do NOT modify any files outside the explicit scope** of the current task. Never touch files in other directories or system files without explicit user permission.
+- **Do NOT run any shell commands** (other than the standard project test/lint commands) **without asking first**. Always present the proposed command and wait for confirmation before executing.
