@@ -34,6 +34,8 @@ def test_generate_report_output_exists(monkeypatch, tmp_path):
         "analytics.report_generator.analyze_market_with_ai",
         lambda: "Mocked summary",
     )
+    mock_df = pandas.DataFrame({"Technology": ["Python"], "Count": [10]})
+    monkeypatch.setattr(pandas, "read_csv", lambda path: mock_df)
 
     with patch("webbrowser.open"):
         generate_report()
