@@ -19,6 +19,7 @@ def test_get_report_data_structure(monkeypatch):
         "run_date",
         "scraped_url",
         "top_skills",
+        "chart_skills",
         "ai_summary",
         "plot_filename",
     }

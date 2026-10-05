@@ -17,7 +17,7 @@ class Scraper(StrEnum):
 
 
 MAX_ITEMS_TO_SCRAPE = {
-    Scraper.DOU_UA: 100,
+    Scraper.DOU_UA: 500,
     Scraper.DJINNI: 100,
 }
 

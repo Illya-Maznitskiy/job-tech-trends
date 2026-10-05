@@ -12,6 +12,7 @@ from config import (
     SCRAPING_OUTPUT_FILE,
     HTML_PAGE_OUTPUT_FILE,
     VISUALIZATION_OUTPUT_FILE,
+    TECHNOLOGIES_TO_DISPLAY,
 )
 from logger import logger
 from utils import log_line_break
@@ -27,6 +28,7 @@ def get_report_data() -> dict:
     run_date = datetime.now().strftime("%d-%m-%Y")
     scraped_url = DOU_UA_URL
     top_skills = output_data.head(3).to_dict("records")
+    chart_skills = output_data.head(TECHNOLOGIES_TO_DISPLAY).to_dict("records")
     ai_summary = analyze_market_with_ai()
     plot_filename = Path(VISUALIZATION_OUTPUT_FILE).name
 
@@ -35,6 +37,7 @@ def get_report_data() -> dict:
         "run_date": run_date,
         "scraped_url": scraped_url,
         "top_skills": top_skills,
+        "chart_skills": chart_skills,
         "ai_summary": ai_summary,
         "plot_filename": plot_filename,
     }
