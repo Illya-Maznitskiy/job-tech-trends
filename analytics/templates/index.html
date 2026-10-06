@@ -554,6 +554,17 @@
         .ai-box a { color: var(--accent); text-underline-offset: 3px; }
         .ai-box .unavailable { color: var(--muted); font-style: italic; }
 
+        /* ---------- Meme break ---------- */
+        .meme-tile { display: grid; justify-items: center; text-align: center; }
+        .meme { max-width: 420px; animation: meme-in 0.4s ease; }
+        .meme img { display: block; width: 100%; height: auto; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+        .meme figcaption { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); }
+        .meme a { color: var(--accent); }
+        @keyframes meme-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: none; }
+        }
+
         /* ---------- Footer ---------- */
         footer { margin-top: 4rem; border-top: 1px solid var(--line); }
         footer .wrap {
@@ -775,6 +786,17 @@
             <div class="ai-box">{% if ai_summary %}{{ ai_summary | safe }}{% else %}<span class="unavailable">AI summary unavailable (check GEMINI_API_KEY).</span>{% endif %}</div>
         </div>
     </section>
+
+    {% if memes %}
+    <section class="section" id="meme" aria-label="Meme break">
+        <div class="tile meme-tile reveal">
+            <figure class="meme" hidden>
+                <img alt="Random job-market meme">
+                <figcaption>Source: <a target="_blank" rel="noopener"></a></figcaption>
+            </figure>
+        </div>
+    </section>
+    {% endif %}
 </main>
 
 <footer>
@@ -836,5 +858,22 @@
         requestAnimationFrame(() => document.body.classList.add("loaded"));
     });
 </script>
+{% if memes %}
+<script>
+    // Meme break: show one random meme per page load
+    const memes = {{ memes | tojson }};
+    const meme = memes[Math.floor(Math.random() * memes.length)];
+    const memeFigure = document.querySelector(".meme");
+    const memeImage = memeFigure.querySelector("img");
+    const memeSource = memeFigure.querySelector("a");
+
+    // Hide the meme if the image is broken
+    memeImage.addEventListener("error", () => { memeFigure.hidden = true; });
+    memeImage.src = "memes/" + meme.file;
+    memeSource.href = meme.source;
+    memeSource.textContent = meme.author;
+    memeFigure.hidden = false;
+</script>
+{% endif %}
 </body>
 </html>

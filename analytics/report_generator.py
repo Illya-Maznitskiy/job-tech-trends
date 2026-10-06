@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 import webbrowser
 from pathlib import Path
 
@@ -13,12 +14,22 @@ from config import (
     HTML_PAGE_OUTPUT_FILE,
     VISUALIZATION_OUTPUT_FILE,
     TECHNOLOGIES_TO_DISPLAY,
+    MEMES_FILE,
 )
 from logger import logger
 from utils import log_line_break
 
 environment = Environment(loader=FileSystemLoader("analytics/templates/"))
 template = environment.get_template("index.html")
+
+
+def get_memes() -> list:
+    try:
+        with open(MEMES_FILE, encoding="utf-8") as file:
+            return json.load(file)
+    except (OSError, ValueError) as e:
+        logger.warning(f"Memes are not loaded: {e}")
+        return []
 
 
 def get_report_data() -> dict:
@@ -40,6 +51,7 @@ def get_report_data() -> dict:
         "chart_skills": chart_skills,
         "ai_summary": ai_summary,
         "plot_filename": plot_filename,
+        "memes": get_memes(),
     }
 
 

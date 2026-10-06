@@ -554,6 +554,17 @@
         .ai-box a { color: var(--accent); text-underline-offset: 3px; }
         .ai-box .unavailable { color: var(--muted); font-style: italic; }
 
+        /* ---------- Meme break ---------- */
+        .meme-tile { display: grid; justify-items: center; text-align: center; }
+        .meme { max-width: 420px; animation: meme-in 0.4s ease; }
+        .meme img { display: block; width: 100%; height: auto; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+        .meme figcaption { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); }
+        .meme a { color: var(--accent); }
+        @keyframes meme-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: none; }
+        }
+
         /* ---------- Footer ---------- */
         footer { margin-top: 4rem; border-top: 1px solid var(--line); }
         footer .wrap {
@@ -662,7 +673,7 @@
 <main id="main" class="wrap">
     <section class="hero" id="top">
         <div class="reveal">
-            <div class="eyebrow"><span class="pulse" aria-hidden="true"></span>Updated 05-10-2026</div>
+            <div class="eyebrow"><span class="pulse" aria-hidden="true"></span>Updated 06-10-2026</div>
             <h1>Job Tech Trends <span class="hl">Report</span></h1>
             <p class="subtitle">Automated analysis 🤖</p>
         </div>
@@ -702,7 +713,7 @@
                     <span class="label">Report Date</span>
                     <span class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
                 </div>
-                <div class="value">05-10-2026</div>
+                <div class="value">06-10-2026</div>
             </div>
             <div class="tile metric span-4 reveal">
                 <div class="metric-top">
@@ -826,13 +837,13 @@
                 </li>
             
                 <li class="chart-row">
-                    <span class="chart-name">react</span>
+                    <span class="chart-name">sql</span>
                     <span class="bar" aria-hidden="true"><span style="--w: 24.4%"></span></span>
                     <span class="chart-count">30</span>
                 </li>
             
                 <li class="chart-row">
-                    <span class="chart-name">sql</span>
+                    <span class="chart-name">react</span>
                     <span class="bar" aria-hidden="true"><span style="--w: 24.4%"></span></span>
                     <span class="chart-count">30</span>
                 </li>
@@ -874,13 +885,13 @@
                 </li>
             
                 <li class="chart-row">
-                    <span class="chart-name">devops</span>
+                    <span class="chart-name">django</span>
                     <span class="bar" aria-hidden="true"><span style="--w: 17.9%"></span></span>
                     <span class="chart-count">22</span>
                 </li>
             
                 <li class="chart-row">
-                    <span class="chart-name">django</span>
+                    <span class="chart-name">devops</span>
                     <span class="bar" aria-hidden="true"><span style="--w: 17.9%"></span></span>
                     <span class="chart-count">22</span>
                 </li>
@@ -908,17 +919,20 @@
                 <strong>Market summary</strong>
                 <span>AI-generated · verify before acting</span>
             </div>
-            <div class="ai-box"><h4>Career Advice</h4>
-<p>Master Python first, as it leads the market with 123 job mentions. Focus heavily on artificial intelligence, which ranks second with 68 mentions.</p>
-
-<h4>Top Career Fields to Target</h4>
-<ol>
-  <li><strong>Backend Engineering</strong> &ndash; Anchored by Python (123), PostgreSQL (62), REST APIs (55), and FastAPI (43).</li>
-  <li><strong>AI and Machine Learning</strong> &ndash; Driven by massive interest in AI (68) and ML (26).</li>
-  <li><strong>Cloud and DevOps</strong> &ndash; Essential infrastructure roles requiring Docker (61), AWS (56), and CI/CD (53).</li>
-</ol></div>
+            <div class="ai-box"><h4>Career Advice</h4><p>Master Python fundamentals first because it leads the market with 123 job mentions. Learn artificial intelligence skills next since AI appears in 68 job postings.</p><h4>Top 3 Career Fields</h4><ol><li><strong>AI and Machine Learning Engineering</strong></li><li><strong>Backend Python Development</strong></li><li><strong>Cloud and DevOps Engineering</strong></li></ol></div>
         </div>
     </section>
+
+    
+    <section class="section" id="meme" aria-label="Meme break">
+        <div class="tile meme-tile reveal">
+            <figure class="meme" hidden>
+                <img alt="Random job-market meme">
+                <figcaption>Source: <a target="_blank" rel="noopener"></a></figcaption>
+            </figure>
+        </div>
+    </section>
+    
 </main>
 
 <footer>
@@ -980,5 +994,22 @@
         requestAnimationFrame(() => document.body.classList.add("loaded"));
     });
 </script>
+
+<script>
+    // Meme break: show one random meme per page load
+    const memes = [{"author": "Momina", "file": "24823021ae72c736db0b8f03c69d45b0.jpg", "source": "https://www.pinterest.com/pin/387239267984133831/"}, {"author": "Vie", "file": "eed0df9f1d32e0561fe6a8d56a44bb56.jpg", "source": "https://www.pinterest.com/pin/1407443631268624/"}, {"author": "slattyall", "file": "cbce414357bb980a2cb63d080bef574b.jpg", "source": "https://www.pinterest.com/pin/255508978854532659/"}];
+    const meme = memes[Math.floor(Math.random() * memes.length)];
+    const memeFigure = document.querySelector(".meme");
+    const memeImage = memeFigure.querySelector("img");
+    const memeSource = memeFigure.querySelector("a");
+
+    // Hide the meme if the image is broken
+    memeImage.addEventListener("error", () => { memeFigure.hidden = true; });
+    memeImage.src = "memes/" + meme.file;
+    memeSource.href = meme.source;
+    memeSource.textContent = meme.author;
+    memeFigure.hidden = false;
+</script>
+
 </body>
 </html>
