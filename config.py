@@ -32,7 +32,7 @@ VISUALIZATION_OUTPUT_FILE = "analytics/data/tech_counts_plot.png"
 HTML_PAGE_OUTPUT_FILE = "analytics/data/index.html"
 MEMES_FILE = "analytics/data/memes/memes.json"
 
-TECHNOLOGIES_TO_DISPLAY = 20
+TECHNOLOGIES_TO_DISPLAY = 10
 
 TECHNOLOGIES_TO_ANALYZE = {
     "python": ["python"],
