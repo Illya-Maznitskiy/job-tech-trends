@@ -3,8 +3,7 @@ name: Job Tech Trends CI/CD
 on:
   push:
     branches:
-      - main
-      - feat/gemini-ai-integration
+      - '**'
   pull_request:
     branches:
       - main
@@ -42,6 +41,7 @@ jobs:
   deploy:
     name: Deploy Static Dashboard to GitHub Pages
     needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

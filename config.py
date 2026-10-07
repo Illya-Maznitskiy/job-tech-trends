@@ -17,7 +17,7 @@ class Scraper(StrEnum):
 
 
 MAX_ITEMS_TO_SCRAPE = {
-    Scraper.DOU_UA: 100,
+    Scraper.DOU_UA: 500,
     Scraper.DJINNI: 100,
 }
 
@@ -30,8 +30,9 @@ SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"
 ANALYSIS_OUTPUT_FILE = "analytics/data/tech_counts.csv"
 VISUALIZATION_OUTPUT_FILE = "analytics/data/tech_counts_plot.png"
 HTML_PAGE_OUTPUT_FILE = "analytics/data/index.html"
+MEMES_FILE = "analytics/data/memes/memes.json"
 
-TECHNOLOGIES_TO_DISPLAY = 20
+TECHNOLOGIES_TO_DISPLAY = 10
 
 TECHNOLOGIES_TO_ANALYZE = {
     "python": ["python"],

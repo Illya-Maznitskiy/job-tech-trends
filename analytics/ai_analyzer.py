@@ -22,7 +22,9 @@ def analyze_market_with_ai() -> str | None:
     models = [
         "gemini-3.8-flash",
         "gemini-3.7-flash",
+        "gemini-3.6-flash",
         "gemini-3.5-flash",
+        "gemini-3.5-flash-lite",
     ]
 
     client = genai.Client(api_key=api_key)
@@ -39,7 +41,9 @@ def analyze_market_with_ai() -> str | None:
         "Format the entire response as clean HTML using only "
         "<h4>, <p>, <strong>, <ol>, <li> and <ul> tags "
         "(no markdown, no code fences, no <html>/<body> wrapper), "
-        "ready to be inserted directly into a webpage.\n\n"
+        "ready to be inserted directly into a webpage. "
+        "Keep the HTML compact: no blank lines, no <br> tags "
+        "and no line breaks between tags.\n\n"
         f"Data:\n{clean_data}"
         f"\nData source: {DOU_UA_URL}"
     )
