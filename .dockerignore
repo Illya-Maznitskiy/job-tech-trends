@@ -1,0 +1,23 @@
+# Secrets: pass them at run time with --env-file
+.env
+
+# Local environment and tooling
+venv/
+.venv/
+.git/
+.idea/
+.claude/
+.github/
+
+# Caches and generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+logs/
+**/logs/
+scraping/data/
+
+# Docs only
+screenshots/
