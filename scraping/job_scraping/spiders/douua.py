@@ -8,7 +8,13 @@ import scrapy
 from scrapy import Selector
 from scrapy.http import Response
 
-from config import DOU_UA_URL, RawJobColumns, MAX_ITEMS_TO_SCRAPE, Scraper
+from config import (
+    DOU_UA_URL,
+    RawJobColumns,
+    MAX_ITEMS_TO_SCRAPE,
+    Scraper,
+    PROGRESS_LOG_EVERY,
+)
 from logger import logger
 
 
@@ -21,6 +27,8 @@ class DouUaSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.seen_urls = set()
+        self.scraped_count = 0
+        self.expected_total = None
         self.start_time = time.time()
         parsed_url = urlparse(DOU_UA_URL)
         query_params = parse_qs(parsed_url.query)
@@ -44,8 +52,45 @@ class DouUaSpider(scrapy.Spider):
         # Normalize NBSP symbols, spaces
         return re.sub(r"[\s\xa0]+", " ", text).strip()
 
+    @staticmethod
+    def get_total_jobs(response: Response) -> int | None:
+        # Header example: "153 jobs  in the Python category"
+        header = response.css("div.b-vacancies-head h1::text").get()
+        match = re.search(r"\d[\d\s\xa0]*", header or "")
+        if not match:
+            return None
+        # Remove spaces inside big numbers: "1 234" -> 1234
+        return int(re.sub(r"\D", "", match.group()))
+
+    def set_expected_total(self, response: Response) -> None:
+        total = self.get_total_jobs(response)
+        if total is None:
+            logger.warning(
+                "Total DOU jobs not found, ETA uses jobs found so far"
+            )
+            return
+        self.expected_total = min(total, self.limit)
+        logger.info(f"Expected DOU jobs: ~{self.expected_total}")
+
+    def log_progress(self) -> None:
+        if self.scraped_count % PROGRESS_LOG_EVERY != 0:
+            return
+        # Best guess of all jobs to scrape: header count or jobs found so far
+        estimated_total = self.expected_total or len(self.seen_urls)
+        avg_per_job = (time.time() - self.start_time) / self.scraped_count
+        jobs_left = max(estimated_total - self.scraped_count, 0)
+        time_left = jobs_left * avg_per_job
+        logger.info(
+            f"Scraped {self.scraped_count}/{estimated_total} jobs, "
+            f"{avg_per_job:.2f}s/job, ~{time_left:.0f}s left"
+        )
+
     def parse(self, response):
         try:
+            # Only the first page has the header with the total
+            if not response.meta.get("csrf_token"):
+                self.set_expected_total(response)
+
             jobs = self.get_jobs_data(response)
             for job in jobs:
                 if len(self.seen_urls) >= self.limit:
@@ -122,6 +167,9 @@ class DouUaSpider(scrapy.Spider):
         location = response.css("span.place.bi.bi-geo-alt-fill::text").get()
         date_posted = response.css("div.date::text").get()
 
+        self.scraped_count += 1
+        self.log_progress()
+
         yield {
             RawJobColumns.TITLE: self.clean_text(title),
             RawJobColumns.COMPANY_NAME: self.clean_text(company_name),
@@ -132,10 +180,10 @@ class DouUaSpider(scrapy.Spider):
         }
 
     def closed(self, reason):
-        logger.info(f"Total DOU jobs scraped: {len(self.seen_urls)}")
+        logger.info(f"Total DOU jobs scraped: {self.scraped_count}")
         total_time = time.time() - self.start_time
         avg_per_job = (
-            total_time / len(self.seen_urls) if len(self.seen_urls) else 0
+            total_time / self.scraped_count if self.scraped_count else 0
         )
         logger.info(f"Total Time    : {total_time:.2f}s")
         logger.info(f"Avg/Job Time  : {avg_per_job:.2f}s")
