@@ -24,6 +24,12 @@ pytest --cov  # with coverage (config in pyproject.toml)
 
 # Lint (config in .flake8)
 flake8
+
+# Docker: build, run once, copy the report out, clean up
+docker build -t job-tech-trends .
+docker run --name job_tech_trends_cont --env-file .env job-tech-trends
+docker cp job_tech_trends_cont:/app/analytics/data/. ./docker-output
+docker rm job_tech_trends_cont
 ```
 
 - Requires a `.env` file (see `.env.example`) with `GEMINI_API_KEY`
@@ -31,6 +37,25 @@ flake8
 - All file paths in `config.py` (and the Jinja2 template path
   in `report_generator.py`) are relative to the working directory.
   Run every command from the project root.
+
+
+## Docker
+
+- `Dockerfile`: `python:3.13-slim`, installs `requirements.txt`,
+  copies the project to `/app`, runs `python main.py` once.
+- `.dockerignore` keeps `.env`, `venv/`, `.git/`, caches, logs,
+  and `scraping/data/` out of the image.
+  - `scraping/data/` is skipped because analysis reads all CSVs there,
+    so old local files would change the counts.
+  - `analytics/data/` is kept: the report needs the memes and favicon.
+- Secrets are never in the image. Pass them at run time
+  with `--env-file .env`.
+  Values in `.env` must have no quotes:
+  `docker run --env-file` keeps quotes as part of the value.
+- No volume: the report stays in the container.
+  Copy it out with `docker cp`.
+- `webbrowser.open()` does nothing in the container (no browser).
+- CI does not use Docker yet.
 
 
 ## Architecture
