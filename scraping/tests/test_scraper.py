@@ -4,6 +4,8 @@ from unittest.mock import patch, MagicMock
 import pytest
 import scrapy
 from scrapy.http import HtmlResponse, TextResponse
+
+from config import PROGRESS_LOG_EVERY
 from scraping.job_scraping.spiders.douua import DouUaSpider
 from scraping.scraper import scrape_jobs
 
@@ -126,6 +128,85 @@ def test_dou_parse_job_details():
     assert item["location"] == "Kyiv"
     assert item["date_posted"] == "14 September 2026"
     assert item["url"] == "https://jobs.dou.ua/vacancies/100/"
+    assert spider.scraped_count == 1
+
+
+def make_header_response(header: str) -> HtmlResponse:
+    html = f"""
+    <html>
+        <body>
+            <div class="b-vacancies-head">
+                <div class="b-inner-page-header"><h1>{header}</h1></div>
+            </div>
+        </body>
+    </html>
+    """
+    return HtmlResponse(
+        url="https://jobs.dou.ua/vacancies/",
+        body=html,
+        encoding="utf-8",
+        request=scrapy.Request(url="https://jobs.dou.ua/vacancies/"),
+    )
+
+
+@pytest.mark.parametrize(
+    "header, expected",
+    [
+        ("153 jobs  in the Python category", 153),
+        ("1\xa0234 вакансії в категорії Python", 1234),
+        ("No jobs in the Python category", None),
+    ],
+)
+def test_dou_get_total_jobs(header, expected):
+    response = make_header_response(header)
+    assert DouUaSpider.get_total_jobs(response) == expected
+
+
+def test_dou_get_total_jobs_without_header():
+    response = HtmlResponse(
+        url="https://jobs.dou.ua/vacancies/",
+        body="<html><body></body></html>",
+        encoding="utf-8",
+    )
+    assert DouUaSpider.get_total_jobs(response) is None
+
+
+def test_dou_parse_sets_expected_total_from_first_page():
+    spider = DouUaSpider()
+    list(spider.parse(make_header_response("153 jobs in Python")))
+    assert spider.expected_total == 153
+
+
+def test_dou_expected_total_is_capped_by_limit():
+    spider = DouUaSpider()
+    spider.set_expected_total(make_header_response(f"{spider.limit + 1}"))
+    assert spider.expected_total == spider.limit
+
+
+@patch("scraping.job_scraping.spiders.douua.logger")
+def test_dou_log_progress_every_n_jobs(mock_logger):
+    spider = DouUaSpider()
+    spider.expected_total = 153
+
+    spider.scraped_count = PROGRESS_LOG_EVERY - 1
+    spider.log_progress()
+    mock_logger.info.assert_not_called()
+
+    spider.scraped_count = PROGRESS_LOG_EVERY
+    spider.log_progress()
+    message = mock_logger.info.call_args.args[0]
+    assert f"Scraped {PROGRESS_LOG_EVERY}/153 jobs" in message
+
+
+@patch("scraping.job_scraping.spiders.douua.logger")
+def test_dou_log_progress_falls_back_to_found_jobs(mock_logger):
+    spider = DouUaSpider()
+    spider.seen_urls = {f"https://jobs.dou.ua/{i}/" for i in range(60)}
+
+    spider.scraped_count = PROGRESS_LOG_EVERY
+    spider.log_progress()
+    message = mock_logger.info.call_args.args[0]
+    assert f"Scraped {PROGRESS_LOG_EVERY}/60 jobs" in message
 
 
 @patch("scraping.scraper.CrawlerProcess")

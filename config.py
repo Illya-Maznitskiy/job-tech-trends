@@ -21,6 +21,9 @@ MAX_ITEMS_TO_SCRAPE = {
     Scraper.DJINNI: 100,
 }
 
+# Log scraping progress every N scraped jobs
+PROGRESS_LOG_EVERY = 50
+
 LOGGER_LEVEL = logging.INFO
 
 # Websites to scrape
