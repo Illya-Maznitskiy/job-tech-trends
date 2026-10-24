@@ -10,18 +10,19 @@ Analyze and visualize the most in-demand technologies in the job market.
 
 ## Technologies Used
 - Python
-- AI integration
 - Scrapy
+- Pandas, ETL
+- Matplotlib, Jinja2 (HTML report)
+- AI integration (Gemini API)
 - Pytest
-- Pandas
-- Matplotlib
-- ETL
+- Docker
+- CI/CD (GitHub Actions, GitHub Pages)
 
 
 ## Features
-- Scrape data from job platforms.
-- Analyze main technologies words from description with Gemini AI.
-- Create visualization of most essential technologies.
+- Scrape DOU.ua jobs and count the most in-demand technologies.
+- Create an HTML report with a chart and an AI market summary (Gemini).
+- Update the live demo every Monday (GitHub Actions + Docker).
 
 
 ## Setup
@@ -78,8 +79,8 @@ flake8
 ```
 
 ## Check the result
-To check the result open the path:
-[analytics/data/tech_counts_plot.png](analytics/data/tech_counts_plot.png)
+Local: open `analytics/data/index.html` in a browser
+(after `python main.py`).
 
 
 # Screenshots
@@ -88,7 +89,7 @@ To check the result open the path:
 ![Scraping Data](screenshots/logging.png)
 
 ### Test Coverage
-![Scraping Data](screenshots/tests_coverage.png)
+![Test Coverage](screenshots/tests_coverage.png)
 
 ### Visualization result
-![Visualization result](screenshots/top_technologies.png)
+![Visualization result](screenshots/main_page.png)
