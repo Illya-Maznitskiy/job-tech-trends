@@ -1,5 +1,13 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(pip list)",
+      "Bash(pytest *)",
+      "Bash(flake8 *)"
+    ],
     "deny": [
       "Read(.env)",
       "Read(**/.env)",

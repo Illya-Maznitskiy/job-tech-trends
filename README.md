@@ -50,6 +50,25 @@ python main.py
 Note: Google AI models can make mistakes, so double-check responses before relying on, publishing, or otherwise using generated content.
 
 
+## Run with Docker
+Requires [Docker](https://docs.docker.com/get-docker/)
+
+```bash
+# Build the image
+docker build -t job-tech-trends .
+
+# Run the pipeline
+docker run --name job_tech_trends_cont --env-file .env job-tech-trends
+
+# Copy the report out of the container
+docker cp job_tech_trends_cont:/app/analytics/data/. ./docker-output
+
+# Remove the container before the next run
+docker rm job_tech_trends_cont
+```
+Then open `docker-output/index.html` in a browser.
+
+
 ## Testing
 Test coverage ~ 90%  
 Open the terminal and use the following command:
