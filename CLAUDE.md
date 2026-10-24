@@ -55,7 +55,8 @@ docker rm job_tech_trends_cont
 - No volume: the report stays in the container.
   Copy it out with `docker cp`.
 - `webbrowser.open()` does nothing in the container (no browser).
-- CI builds the image and runs pytest inside it (see CI/CD).
+- CI runs pytest in the image, and CD runs the pipeline in it
+  and deploys the new report (see CI/CD).
 
 
 ## Architecture
@@ -146,15 +147,21 @@ Files: `analytics/visualization.py`, `analytics/report_generator.py`,
 
 ## CI/CD
 
-`.github/workflows/deploy.yml`:
+One workflow: `.github/workflows/deploy.yml`. Three jobs:
 
-- runs flake8 + pytest on push to any branch and on PRs to `main`;
-- `docker` job: builds the image and runs pytest inside the container
-  (a check only, the image is not deployed);
-- deploys `analytics/data/` to GitHub Pages on push to `main`,
-  only if both `test` and `docker` pass.
-- CI does not run the pipeline.
-  Pages publishes the report files that are committed in `analytics/data/`.
+1. `test`: flake8 + pytest.
+2. `docker`: build the image, run pytest inside it.
+3. `deploy`: run the pipeline in Docker, deploy the report to Pages.
+   - Runs only on `main`, and only if `test` and `docker` pass.
+   - Uses the `GEMINI_API_KEY` repository secret.
+   - Two guards stop the deploy, so the old site stays live:
+     no jobs in `jobs.csv`, or `index.html` is not from today.
+     They are needed because `main.py` never exits with an error.
+
+When it runs:
+
+- push to any branch, PR to `main`: `test` + `docker`;
+- push to `main`, every Monday 06:00 UTC, manual button: all three.
 
 
 # Strict rules

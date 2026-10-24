@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    - cron: '0 6 * * 1'  # every Monday at 06:00 UTC
+  workflow_dispatch:  # manual "Run workflow" button
 
 permissions:
   id-token: write
@@ -55,16 +58,38 @@ jobs:
   deploy:
     name: Deploy Static Dashboard to GitHub Pages
     needs: [test, docker]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Build Docker image
+        run: docker build -t job-tech-trends .
+
+      - name: Run pipeline in container
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: >
+          docker run --name job_tech_trends_cont
+          -e GEMINI_API_KEY job-tech-trends
+
+      - name: Copy report and scraped jobs out of container
+        run: |
+          docker cp job_tech_trends_cont:/app/analytics/data/. ./site
+          docker cp job_tech_trends_cont:/app/scraping/data/jobs.csv .
+
+      # Guards: stop the deploy, so the old site stays live
+      - name: Check at least 1 job was scraped
+        run: test "$(wc -l < jobs.csv)" -gt 1  # header + 1 job
+
+      - name: Check report is from today
+        run: grep -q "Updated $(date +%d-%m-%Y)" site/index.html
+
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'analytics/data/'
+          path: 'site/'
 
       - name: Deploy to GitHub Pages
         id: deployment
