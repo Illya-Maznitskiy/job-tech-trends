@@ -55,7 +55,7 @@ docker rm job_tech_trends_cont
 - No volume: the report stays in the container.
   Copy it out with `docker cp`.
 - `webbrowser.open()` does nothing in the container (no browser).
-- CI does not use Docker yet.
+- CI builds the image and runs pytest inside it (see CI/CD).
 
 
 ## Architecture
@@ -149,7 +149,10 @@ Files: `analytics/visualization.py`, `analytics/report_generator.py`,
 `.github/workflows/deploy.yml`:
 
 - runs flake8 + pytest on push to any branch and on PRs to `main`;
-- deploys `analytics/data/` to GitHub Pages on push to `main`.
+- `docker` job: builds the image and runs pytest inside the container
+  (a check only, the image is not deployed);
+- deploys `analytics/data/` to GitHub Pages on push to `main`,
+  only if both `test` and `docker` pass.
 - CI does not run the pipeline.
   Pages publishes the report files that are committed in `analytics/data/`.
 

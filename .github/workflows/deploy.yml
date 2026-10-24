@@ -38,9 +38,23 @@ jobs:
         run: pytest
 
 
+  docker:
+    name: Build Docker Image & Run Pytest Inside
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t job-tech-trends .
+
+      - name: Run Pytest in container
+        run: docker run --rm job-tech-trends pytest
+
+
   deploy:
     name: Deploy Static Dashboard to GitHub Pages
-    needs: test
+    needs: [test, docker]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
