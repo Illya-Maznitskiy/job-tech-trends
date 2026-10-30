@@ -27,9 +27,19 @@ PROGRESS_LOG_EVERY = 50
 LOGGER_LEVEL = logging.INFO
 
 # Websites to scrape
-DOU_UA_URL = "https://jobs.dou.ua/vacancies/?category=Python"
+DOU_UA_BASE_URL = "https://jobs.dou.ua/vacancies/"
+DOU_UA_URL = f"{DOU_UA_BASE_URL}?category=Python"
+
+# Position key -> DOU category name
+POSITIONS = {
+    "python": "Python",
+    "frontend": "Front End",
+    "devops": "DevOps",
+    "data_science": "Data Science",
+}
 
 SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"
+POSITION_SCRAPING_OUTPUT_FILE = "scraping/data/{position}/jobs.csv"
 ANALYSIS_OUTPUT_FILE = "analytics/data/tech_counts.csv"
 VISUALIZATION_OUTPUT_FILE = "analytics/data/tech_counts_plot.png"
 HTML_PAGE_OUTPUT_FILE = "analytics/data/index.html"
