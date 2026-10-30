@@ -5,7 +5,7 @@ import pytest
 import scrapy
 from scrapy.http import HtmlResponse, TextResponse
 
-from config import PROGRESS_LOG_EVERY
+from config import PROGRESS_LOG_EVERY, POSITIONS
 from scraping.job_scraping.spiders.douua import DouUaSpider
 from scraping.scraper import scrape_jobs
 
@@ -217,8 +217,23 @@ def test_scrape_jobs_success(mock_crawler_process):
     scrape_jobs()
 
     mock_crawler_process.assert_called_once()
-    mock_process_instance.crawl.assert_called_once()
+    assert mock_process_instance.crawl.call_count == len(POSITIONS)
+    categories = [
+        call.kwargs["category"]
+        for call in mock_process_instance.crawl.call_args_list
+    ]
+    assert categories == list(POSITIONS.values())
     mock_process_instance.start.assert_called_once()
+
+
+def test_dou_spider_builds_urls_from_category():
+    spider = DouUaSpider(category="Front End")
+
+    assert spider.category == "Front End"
+    assert spider.start_urls == [
+        "https://jobs.dou.ua/vacancies/?category=Front%20End"
+    ]
+    assert spider.query_string == "category=Front%20End"
 
 
 @patch("scraping.scraper.CrawlerProcess")

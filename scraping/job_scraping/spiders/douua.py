@@ -1,7 +1,7 @@
 import json
 import re
 from typing import Sequence
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import quote, urlencode
 import time
 
 import scrapy
@@ -9,7 +9,7 @@ from scrapy import Selector
 from scrapy.http import Response
 
 from config import (
-    DOU_UA_URL,
+    DOU_UA_BASE_URL,
     RawJobColumns,
     MAX_ITEMS_TO_SCRAPE,
     Scraper,
@@ -21,18 +21,18 @@ from logger import logger
 class DouUaSpider(scrapy.Spider):
     name = "dou_ua"
     allowed_domains = ["dou.ua", "jobs.dou.ua"]
-    start_urls = [DOU_UA_URL]
     limit = MAX_ITEMS_TO_SCRAPE[Scraper.DOU_UA]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, category="Python", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.seen_urls = set()
         self.scraped_count = 0
         self.expected_total = None
         self.start_time = time.time()
-        parsed_url = urlparse(DOU_UA_URL)
-        query_params = parse_qs(parsed_url.query)
-        self.category = query_params.get("category", [None])[0]
+        self.category = category
+        self.query_string = urlencode({"category": category}, quote_via=quote)
+        self.start_url = f"{DOU_UA_BASE_URL}?{self.query_string}"
+        self.start_urls = [self.start_url]
 
     @staticmethod
     def get_jobs_data(response: Response) -> Sequence[Selector]:
@@ -130,20 +130,15 @@ class DouUaSpider(scrapy.Spider):
                 if self.category:
                     formdata["category"] = self.category
 
-                parsed_base = urlparse(DOU_UA_URL)
-                query_string = (
-                    f"?{parsed_base.query}" if parsed_base.query else ""
-                )
-
                 yield scrapy.FormRequest(
                     url=(
                         "https://jobs.dou.ua/vacancies/xhr-load/"
-                        f"{query_string}"
+                        f"?{self.query_string}"
                     ),
                     formdata=formdata,
                     headers={
                         "X-Requested-With": "XMLHttpRequest",
-                        "Referer": DOU_UA_URL,
+                        "Referer": self.start_url,
                     },
                     meta={"csrf_token": csrf_token},
                     callback=self.parse,
