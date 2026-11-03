@@ -13,7 +13,8 @@ from config import (
     RawJobColumns,
     MAX_ITEMS_TO_SCRAPE,
     Scraper,
-    PROGRESS_LOG_EVERY,
+    PROGRESS_BAR_WIDTH,
+    PROGRESS_LOG_STEPS,
 )
 from logger import logger
 
@@ -66,22 +67,27 @@ class DouUaSpider(scrapy.Spider):
         total = self.get_total_jobs(response)
         if total is None:
             logger.warning(
-                "Total DOU jobs not found, ETA uses jobs found so far"
+                "⚠️ Total DOU jobs not found, ETA uses jobs found so far"
             )
             return
         self.expected_total = min(total, self.limit)
         logger.info(f"Expected DOU jobs: ~{self.expected_total}")
 
     def log_progress(self) -> None:
-        if self.scraped_count % PROGRESS_LOG_EVERY != 0:
-            return
         # Best guess of all jobs to scrape: header count or jobs found so far
         estimated_total = self.expected_total or len(self.seen_urls)
+        log_every = max(estimated_total // PROGRESS_LOG_STEPS, 1)
+        if self.scraped_count % log_every != 0:
+            return
+        percent = min(self.scraped_count * 100 // max(estimated_total, 1), 100)
+        filled = percent * PROGRESS_BAR_WIDTH // 100
+        bar = "#" * filled + "-" * (PROGRESS_BAR_WIDTH - filled)
         avg_per_job = (time.time() - self.start_time) / self.scraped_count
         jobs_left = max(estimated_total - self.scraped_count, 0)
         time_left = jobs_left * avg_per_job
         logger.info(
-            f"Scraped {self.scraped_count}/{estimated_total} jobs, "
+            f"📊 Scraped {self.scraped_count}/{estimated_total} jobs "
+            f"[{bar}] {percent}%, "
             f"{avg_per_job:.2f}s/job, ~{time_left:.0f}s left"
         )
 
