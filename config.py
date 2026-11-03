@@ -21,8 +21,9 @@ MAX_ITEMS_TO_SCRAPE = {
     Scraper.DJINNI: 100,
 }
 
-# Log scraping progress every N scraped jobs
-PROGRESS_LOG_EVERY = 50
+# Log scraping progress this many times per position (every 100 / N %)
+PROGRESS_LOG_STEPS = 5  # how many times to log it (like each 20%)
+PROGRESS_BAR_WIDTH = 10
 
 LOGGER_LEVEL = logging.INFO
 

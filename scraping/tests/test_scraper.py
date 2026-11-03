@@ -5,7 +5,7 @@ import pytest
 import scrapy
 from scrapy.http import HtmlResponse, TextResponse
 
-from config import PROGRESS_LOG_EVERY, POSITIONS
+from config import PROGRESS_LOG_STEPS, POSITIONS
 from scraping.job_scraping.spiders.douua import DouUaSpider
 from scraping.scraper import scrape_jobs
 
@@ -186,16 +186,28 @@ def test_dou_expected_total_is_capped_by_limit():
 @patch("scraping.job_scraping.spiders.douua.logger")
 def test_dou_log_progress_every_n_jobs(mock_logger):
     spider = DouUaSpider()
-    spider.expected_total = 153
+    spider.expected_total = 100
+    step = 100 // PROGRESS_LOG_STEPS
 
-    spider.scraped_count = PROGRESS_LOG_EVERY - 1
+    spider.scraped_count = step - 1
     spider.log_progress()
     mock_logger.info.assert_not_called()
 
-    spider.scraped_count = PROGRESS_LOG_EVERY
+    spider.scraped_count = step
     spider.log_progress()
     message = mock_logger.info.call_args.args[0]
-    assert f"Scraped {PROGRESS_LOG_EVERY}/153 jobs" in message
+    assert f"Scraped {step}/100 jobs" in message
+    assert f"[##--------] {step}%" in message
+
+
+@patch("scraping.job_scraping.spiders.douua.logger")
+def test_dou_log_progress_works_for_small_positions(mock_logger):
+    spider = DouUaSpider()
+    spider.expected_total = 34
+
+    spider.scraped_count = 34 // PROGRESS_LOG_STEPS
+    spider.log_progress()
+    mock_logger.info.assert_called_once()
 
 
 @patch("scraping.job_scraping.spiders.douua.logger")
@@ -203,10 +215,10 @@ def test_dou_log_progress_falls_back_to_found_jobs(mock_logger):
     spider = DouUaSpider()
     spider.seen_urls = {f"https://jobs.dou.ua/{i}/" for i in range(60)}
 
-    spider.scraped_count = PROGRESS_LOG_EVERY
+    spider.scraped_count = 60 // PROGRESS_LOG_STEPS
     spider.log_progress()
     message = mock_logger.info.call_args.args[0]
-    assert f"Scraped {PROGRESS_LOG_EVERY}/60 jobs" in message
+    assert f"Scraped {60 // PROGRESS_LOG_STEPS}/60 jobs" in message
 
 
 @patch("scraping.scraper.CrawlerProcess")
