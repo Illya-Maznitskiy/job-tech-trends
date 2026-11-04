@@ -8,8 +8,9 @@ from collections import Counter
 
 from config import (
     TECHNOLOGIES_TO_ANALYZE,
-    SCRAPING_OUTPUT_FILE,
-    ANALYSIS_OUTPUT_FILE,
+    POSITIONS,
+    POSITION_SCRAPING_OUTPUT_FILE,
+    POSITION_ANALYSIS_OUTPUT_FILE,
 )
 from logger import logger
 from utils import log_line_break
@@ -54,18 +55,31 @@ def save_results(counts: dict[str:int], output_path: str) -> None:
     logger.info(f"Results saved to {output_path}")
 
 
+def analyze_position(position: str) -> None:
+    jobs_file = POSITION_SCRAPING_OUTPUT_FILE.format(position=position)
+    output_file = POSITION_ANALYSIS_OUTPUT_FILE.format(position=position)
+
+    if not os.path.exists(jobs_file):
+        logger.error(f"Scraped data file not found at: {jobs_file}")
+        return
+
+    descriptions = get_job_descriptions(os.path.dirname(jobs_file))
+    tech_counts = count_technologies(descriptions)
+
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    save_results(tech_counts, output_file)
+
+
 def analyze_technologies() -> None:
     log_line_break()
     logger.info("Starting analysis...")
 
-    if not os.path.exists(SCRAPING_OUTPUT_FILE):
-        logger.error(f"Scraped data file not found at: {SCRAPING_OUTPUT_FILE}")
-        return
-
-    os.makedirs(os.path.dirname(ANALYSIS_OUTPUT_FILE), exist_ok=True)
-    descriptions = get_job_descriptions(os.path.dirname(SCRAPING_OUTPUT_FILE))
-    tech_counts = count_technologies(descriptions)
-
-    save_results(tech_counts, ANALYSIS_OUTPUT_FILE)
+    for position in POSITIONS:
+        logger.info(f"Analysing position: {position}")
+        try:
+            analyze_position(position)
+        except Exception as e:
+            # One broken position must not stop the others
+            logger.error(f"Analysis failed for {position}: {e}")
 
     logger.info("Analysing finished.")
