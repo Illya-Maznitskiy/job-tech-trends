@@ -4,14 +4,16 @@ import pandas
 from dotenv import load_dotenv
 from google import genai
 
-from config import ANALYSIS_OUTPUT_FILE, DOU_UA_URL
 from logger import logger
+from utils import get_position_url
 
 
 load_dotenv()
 
 
-def analyze_market_with_ai() -> str | None:
+def analyze_market_with_ai(
+    position: str, category: str, counts: pandas.DataFrame
+) -> str | None:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         logger.warning(
@@ -28,11 +30,10 @@ def analyze_market_with_ai() -> str | None:
     ]
 
     client = genai.Client(api_key=api_key)
-    data = pandas.read_csv(ANALYSIS_OUTPUT_FILE)
-    clean_data = data.head(30).to_string(index=False)
+    clean_data = counts.head(30).to_string(index=False)
     prompt = (
         "You are an expert tech career advisor. "
-        "Analyze the following job market "
+        f"Analyze the following {category} job market "
         "technology frequencies and provide:\n"
         "1. Career advice in exactly 2 short, simple, plain sentences "
         "(max ~15 words each, no jargon-stacking), "
@@ -45,11 +46,11 @@ def analyze_market_with_ai() -> str | None:
         "Keep the HTML compact: no blank lines, no <br> tags "
         "and no line breaks between tags.\n\n"
         f"Data:\n{clean_data}"
-        f"\nData source: {DOU_UA_URL}"
+        f"\nData source: {get_position_url(category)}"
     )
 
     for model in models:
-        logger.info(f"Analyzing data with {model} model...")
+        logger.info(f"Analyzing {position} with {model} model...")
         try:
             response = client.interactions.create(
                 model=model,
