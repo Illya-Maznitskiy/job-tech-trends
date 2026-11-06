@@ -1,4 +1,4 @@
-from analytics import analysis, visualization
+from analytics import analysis, report_generator
 from scraping import scraper
 from logger import logger
 
@@ -7,5 +7,5 @@ if __name__ == "__main__":
 
     scraper.scrape_jobs()
     analysis.analyze_technologies()
-    visualization.visualize_jobs()
+    report_generator.generate_report()
     logger.info("Job Technical Trends Completed")
