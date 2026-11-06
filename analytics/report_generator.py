@@ -8,16 +8,15 @@ from jinja2 import Environment, FileSystemLoader
 
 from analytics.ai_analyzer import analyze_market_with_ai
 from config import (
-    DOU_UA_URL,
-    ANALYSIS_OUTPUT_FILE,
-    SCRAPING_OUTPUT_FILE,
+    POSITIONS,
+    POSITION_ANALYSIS_OUTPUT_FILE,
+    POSITION_SCRAPING_OUTPUT_FILE,
     HTML_PAGE_OUTPUT_FILE,
-    VISUALIZATION_OUTPUT_FILE,
     TECHNOLOGIES_TO_DISPLAY,
     MEMES_FILE,
 )
 from logger import logger
-from utils import log_line_break
+from utils import log_line_break, get_position_url
 
 environment = Environment(loader=FileSystemLoader("analytics/templates/"))
 template = environment.get_template("index.html")
@@ -32,26 +31,45 @@ def get_memes() -> list:
         return []
 
 
-def get_report_data() -> dict:
-    output_data = pandas.read_csv(ANALYSIS_OUTPUT_FILE)
-
-    total_jobs = len(pandas.read_csv(SCRAPING_OUTPUT_FILE))
-    run_date = datetime.now().strftime("%d-%m-%Y")
-    scraped_url = DOU_UA_URL
-    top_skills = output_data.head(3).to_dict("records")
-    chart_skills = output_data.head(TECHNOLOGIES_TO_DISPLAY).to_dict("records")
-    ai_summary = analyze_market_with_ai()
-    plot_filename = Path(VISUALIZATION_OUTPUT_FILE).name
+def get_position_data(position: str, category: str) -> dict:
+    counts = pandas.read_csv(
+        POSITION_ANALYSIS_OUTPUT_FILE.format(position=position)
+    )
+    jobs = pandas.read_csv(
+        POSITION_SCRAPING_OUTPUT_FILE.format(position=position)
+    )
 
     return {
-        "total_jobs": total_jobs,
-        "run_date": run_date,
-        "scraped_url": scraped_url,
-        "top_skills": top_skills,
-        "chart_skills": chart_skills,
-        "ai_summary": ai_summary,
-        "plot_filename": plot_filename,
+        "name": position,
+        "category": category,
+        "total_jobs": len(jobs),
+        "scraped_url": get_position_url(category),
+        "top_skills": counts.head(3).to_dict("records"),
+        "chart_skills": counts.head(TECHNOLOGIES_TO_DISPLAY).to_dict(
+            "records"
+        ),
+        "ai_summary": analyze_market_with_ai(position, category, counts),
+    }
+
+
+def get_report_data() -> dict:
+    positions = []
+    for position, category in POSITIONS.items():
+        try:
+            positions.append(get_position_data(position, category))
+        except Exception as e:
+            # One broken position must not stop the others
+            logger.error(f"Report skipped {position}: {e}")
+
+    if not positions:
+        raise ValueError("No position data found for the report")
+
+    return {
+        "run_date": datetime.now().strftime("%d-%m-%Y"),
         "memes": get_memes(),
+        "positions": positions,
+        # TEMP: the template still reads one position, until it gets buttons
+        **positions[0],
     }
 
 
