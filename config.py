@@ -46,7 +46,6 @@ POSITION_ANALYSIS_OUTPUT_FILE = "analytics/data/{position}/tech_counts.csv"
 # ---------- OLD: single file, remove after the migration ----------
 SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"
 ANALYSIS_OUTPUT_FILE = "analytics/data/tech_counts.csv"
-VISUALIZATION_OUTPUT_FILE = "analytics/data/tech_counts_plot.png"
 
 HTML_PAGE_OUTPUT_FILE = "analytics/data/index.html"
 MEMES_FILE = "analytics/data/memes/memes.json"
