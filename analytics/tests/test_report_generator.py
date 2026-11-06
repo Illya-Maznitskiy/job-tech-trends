@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pandas
+import pytest
 
 from analytics.report_generator import (
     get_memes,
@@ -9,26 +10,70 @@ from analytics.report_generator import (
 )
 
 
-def test_get_report_data_structure(monkeypatch):
+def set_up_report(monkeypatch, positions=None):
+    positions = positions or {"python": "Python", "devops": "DevOps"}
+    monkeypatch.setattr("analytics.report_generator.POSITIONS", positions)
     monkeypatch.setattr(
         "analytics.report_generator.analyze_market_with_ai",
-        lambda: "Mocked summary",
+        lambda position, category, counts: f"Summary {position}",
     )
     mock_df = pandas.DataFrame({"Technology": ["Python"], "Count": [10]})
     monkeypatch.setattr(pandas, "read_csv", lambda path: mock_df)
 
+
+def test_get_report_data_has_every_position(monkeypatch):
+    set_up_report(monkeypatch)
+
     data = get_report_data()
-    expected_keys = {
+
+    assert {"run_date", "memes", "positions"}.issubset(data.keys())
+    assert [p["name"] for p in data["positions"]] == ["python", "devops"]
+    assert data["positions"][1]["ai_summary"] == "Summary devops"
+    assert data["positions"][1]["total_jobs"] == 1
+    assert "category=DevOps" in data["positions"][1]["scraped_url"]
+
+
+def test_get_report_data_keeps_old_keys_for_first_position(monkeypatch):
+    # The current template still reads these, until it gets the buttons
+    set_up_report(monkeypatch)
+
+    data = get_report_data()
+
+    old_keys = {
         "total_jobs",
-        "run_date",
         "scraped_url",
         "top_skills",
         "chart_skills",
         "ai_summary",
-        "plot_filename",
-        "memes",
     }
-    assert expected_keys.issubset(data.keys())
+    assert old_keys.issubset(data.keys())
+    assert data["ai_summary"] == "Summary python"
+
+
+def test_get_report_data_skips_position_without_data(monkeypatch):
+    set_up_report(monkeypatch)
+    mock_df = pandas.DataFrame({"Technology": ["Python"], "Count": [10]})
+
+    def read_csv(path):
+        if "devops" in path:
+            raise FileNotFoundError(path)
+        return mock_df
+
+    monkeypatch.setattr(pandas, "read_csv", read_csv)
+
+    data = get_report_data()
+
+    assert [p["name"] for p in data["positions"]] == ["python"]
+
+
+def test_get_report_data_fails_without_any_position(monkeypatch):
+    set_up_report(monkeypatch)
+    monkeypatch.setattr(
+        pandas, "read_csv", lambda path: (_ for _ in ()).throw(OSError(path))
+    )
+
+    with pytest.raises(ValueError):
+        get_report_data()
 
 
 def test_generate_report_output_exists(monkeypatch, tmp_path):
@@ -36,12 +81,7 @@ def test_generate_report_output_exists(monkeypatch, tmp_path):
     monkeypatch.setattr(
         "analytics.report_generator.HTML_PAGE_OUTPUT_FILE", str(output_file)
     )
-    monkeypatch.setattr(
-        "analytics.report_generator.analyze_market_with_ai",
-        lambda: "Mocked summary",
-    )
-    mock_df = pandas.DataFrame({"Technology": ["Python"], "Count": [10]})
-    monkeypatch.setattr(pandas, "read_csv", lambda path: mock_df)
+    set_up_report(monkeypatch)
 
     with patch("webbrowser.open"):
         generate_report()
