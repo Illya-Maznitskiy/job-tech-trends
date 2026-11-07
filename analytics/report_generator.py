@@ -68,8 +68,6 @@ def get_report_data() -> dict:
         "run_date": datetime.now().strftime("%d-%m-%Y"),
         "memes": get_memes(),
         "positions": positions,
-        # TEMP: the template still reads one position, until it gets buttons
-        **positions[0],
     }
 
 

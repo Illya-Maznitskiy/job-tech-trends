@@ -639,6 +639,26 @@
         .gh-link:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
         .gh-link svg { width: 16px; height: 16px; fill: currentColor; }
 
+        /* ---------- Position tabs ---------- */
+        .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-top: 1.5rem; }
+        .tab {
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text);
+            background: var(--surface);
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            padding: 0.5rem 1.1rem;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .tab:hover { color: var(--ink); border-color: var(--ink); }
+        .tab.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+        .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        /* Without JS every panel stays visible */
+        .js .panel:not(.active) { display: none; }
+
         /* ---------- Motion ---------- */
         .js .reveal {
             opacity: 0;
@@ -684,27 +704,21 @@
     </style>
 </head>
 <body>
-{% set domain = scraped_url.split('//')[-1].split('/')[0] %}
-{% set tj = total_jobs | int %}
-{% set counts = top_skills | map(attribute='Count') | list %}
-{% set max_count = ((counts | max) if counts else 0) or 1 %}
-{% set denom = tj if tj > 0 else max_count %}
-{% set leader = top_skills[0] if top_skills else none %}
-
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="topbar">
     <div class="wrap">
-        <a class="brand" href="#top">
+        <a class="brand" href="#main">
             <span class="brand-mark" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#d4ff3a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
             </span>
             Job Tech Trends
         </a>
         <nav class="nav" aria-label="Sections">
-            <a href="#overview">Overview</a>
-            <a href="#chart">Chart</a>
-            <a href="#insights">Insights</a>
+            {# JS points these at the visible position #}
+            <a href="#{{ positions[0].name }}-overview" data-section="overview">Overview</a>
+            <a href="#{{ positions[0].name }}-chart" data-section="chart">Chart</a>
+            <a href="#{{ positions[0].name }}-insights" data-section="insights">Insights</a>
         </nav>
         <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
             <span class="knob">
@@ -716,7 +730,27 @@
 </header>
 
 <main id="main" class="wrap">
-    <section class="hero" id="top">
+    <div class="tabs" role="tablist" aria-label="Position">
+    {% for p in positions %}
+        <button class="tab{% if loop.first %} active{% endif %}" type="button" role="tab" data-tab="{{ p.name }}" aria-controls="panel-{{ p.name }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ p.category }}</button>
+    {% endfor %}
+    </div>
+
+    {# One panel per position. All are in the page, JS shows one at a time #}
+    {% for p in positions %}
+    {% set scraped_url = p.scraped_url %}
+    {% set total_jobs = p.total_jobs %}
+    {% set top_skills = p.top_skills %}
+    {% set chart_skills = p.chart_skills %}
+    {% set ai_summary = p.ai_summary %}
+    {% set domain = scraped_url.split('//')[-1].split('/')[0] %}
+    {% set tj = total_jobs | int %}
+    {% set counts = top_skills | map(attribute='Count') | list %}
+    {% set max_count = ((counts | max) if counts else 0) or 1 %}
+    {% set denom = tj if tj > 0 else max_count %}
+    {% set leader = top_skills[0] if top_skills else none %}
+    <div class="panel{% if loop.first %} active{% endif %}" id="panel-{{ p.name }}">
+    <section class="hero">
         <div class="reveal">
             <div class="eyebrow"><span class="pulse" aria-hidden="true"></span>Updated {{ run_date }}</div>
             <h1>Job Tech Trends <span class="hl">Report</span></h1>
@@ -736,7 +770,7 @@
         {% endif %}
     </section>
 
-    <section class="section" id="overview">
+    <section class="section" id="{{ p.name }}-overview">
         <div class="section-head reveal">
             <div>
                 <div class="section-kicker">01</div>
@@ -793,7 +827,7 @@
         </div>
     </section>
 
-    <section class="section" id="chart">
+    <section class="section" id="{{ p.name }}-chart">
         <div class="section-head reveal">
             <div>
                 <div class="section-kicker">02</div>
@@ -815,7 +849,7 @@
         </div>
     </section>
 
-    <section class="section" id="insights">
+    <section class="section" id="{{ p.name }}-insights">
         <div class="section-head reveal">
             <div>
                 <div class="section-kicker">03</div>
@@ -831,6 +865,8 @@
             <div class="ai-box">{% if ai_summary %}{{ ai_summary | safe }}{% else %}<span class="unavailable">AI summary unavailable (check GEMINI_API_KEY).</span>{% endif %}</div>
         </div>
     </section>
+    </div>
+    {% endfor %}
 
     {% if memes %}
     <section class="section" id="meme" aria-label="Meme break">
@@ -904,6 +940,36 @@
         } else {
             items.forEach((el) => el.classList.add("in"));
         }
+
+        // Position tabs: show one panel, keep the choice in the URL hash
+        const tabs = document.querySelectorAll(".tab");
+        const panels = document.querySelectorAll(".panel");
+        const navLinks = document.querySelectorAll(".nav a[data-section]");
+        const showPosition = (name) => {
+            tabs.forEach((tab) => {
+                const on = tab.dataset.tab === name;
+                tab.classList.toggle("active", on);
+                tab.setAttribute("aria-selected", String(on));
+            });
+            panels.forEach((panel) => {
+                const on = panel.id === "panel-" + name;
+                panel.classList.toggle("active", on);
+                // A hidden panel was never scrolled into view, so show its blocks now
+                if (on) panel.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+            });
+            navLinks.forEach((link) => { link.href = "#" + name + "-" + link.dataset.section; });
+        };
+        // "#devops" or a nav link like "#devops-chart" both name the position
+        const hashPosition = () => location.hash.slice(1).split("-")[0];
+        const syncFromHash = () => {
+            if (document.getElementById("panel-" + hashPosition())) showPosition(hashPosition());
+        };
+        tabs.forEach((tab) => tab.addEventListener("click", () => {
+            showPosition(tab.dataset.tab);
+            history.replaceState(null, "", "#" + tab.dataset.tab);
+        }));
+        window.addEventListener("hashchange", syncFromHash);
+        syncFromHash();
 
         requestAnimationFrame(() => document.body.classList.add("loaded"));
     });
