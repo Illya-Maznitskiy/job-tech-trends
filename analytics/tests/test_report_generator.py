@@ -1,3 +1,5 @@
+import re
+from datetime import datetime
 from unittest.mock import patch
 
 import pandas
@@ -7,6 +9,7 @@ from analytics.report_generator import (
     get_memes,
     get_report_data,
     generate_report,
+    template,
 )
 
 
@@ -33,21 +36,45 @@ def test_get_report_data_has_every_position(monkeypatch):
     assert "category=DevOps" in data["positions"][1]["scraped_url"]
 
 
-def test_get_report_data_keeps_old_keys_for_first_position(monkeypatch):
-    # The current template still reads these, until it gets the buttons
+def render_page(monkeypatch) -> str:
     set_up_report(monkeypatch)
+    return template.render(get_report_data())
 
-    data = get_report_data()
 
-    old_keys = {
-        "total_jobs",
-        "scraped_url",
-        "top_skills",
-        "chart_skills",
-        "ai_summary",
-    }
-    assert old_keys.issubset(data.keys())
-    assert data["ai_summary"] == "Summary python"
+def test_page_has_button_and_panel_for_each_position(monkeypatch):
+    html = render_page(monkeypatch)
+
+    for name in ["python", "devops"]:
+        assert f'data-tab="{name}"' in html
+        assert f'id="panel-{name}"' in html
+
+
+def test_page_shows_only_first_panel_at_start(monkeypatch):
+    html = render_page(monkeypatch)
+
+    assert '<div class="panel active" id="panel-python">' in html
+    assert '<div class="panel" id="panel-devops">' in html
+
+
+def test_page_has_own_summary_in_each_panel(monkeypatch):
+    html = render_page(monkeypatch)
+
+    assert "Summary python" in html
+    assert "Summary devops" in html
+
+
+def test_page_ids_are_unique(monkeypatch):
+    html = render_page(monkeypatch)
+
+    ids = re.findall(r'\sid="([^"]+)"', html)
+    assert len(ids) == len(set(ids))
+
+
+def test_page_keeps_updated_date(monkeypatch):
+    html = render_page(monkeypatch)
+
+    # The deploy check looks for this exact text
+    assert f"Updated {datetime.now():%d-%m-%Y}" in html
 
 
 def test_get_report_data_skips_position_without_data(monkeypatch):
