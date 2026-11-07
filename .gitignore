@@ -24,6 +24,10 @@
 output/
 *.csv
 
+# Generated report files, CI builds them
+analytics/data/index.html
+analytics/data/tech_counts_plot.png
+
 .idea/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
