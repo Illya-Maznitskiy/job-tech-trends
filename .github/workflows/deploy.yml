@@ -77,11 +77,28 @@ jobs:
       - name: Copy report and scraped jobs out of container
         run: |
           docker cp job_tech_trends_cont:/app/analytics/data/. ./site
-          docker cp job_tech_trends_cont:/app/scraping/data/jobs.csv .
+          docker cp job_tech_trends_cont:/app/scraping/data/. ./scraped
 
       # Guards: stop the deploy, so the old site stays live
-      - name: Check at least 1 job was scraped
-        run: test "$(wc -l < jobs.csv)" -gt 1  # header + 1 job
+      - name: Check every position has jobs and a report panel
+        env:
+          MIN_JOBS: 10
+        run: |
+          positions=$(docker run --rm job-tech-trends \
+            python -c "from config import POSITIONS; print(*POSITIONS)")
+          for p in $positions; do
+            # wc -l counts the header line too
+            lines=$(wc -l < "scraped/$p/jobs.csv" || echo 0)
+            if [ "$lines" -le "$MIN_JOBS" ]; then
+              echo "::error::Position $p has too few jobs"
+              exit 1
+            fi
+            # A position that failed in the report has no panel
+            if ! grep -q "id=\"panel-$p\"" site/index.html; then
+              echo "::error::Position $p has no panel in the report"
+              exit 1
+            fi
+          done
 
       - name: Check report is from today
         run: grep -q "Updated $(date +%d-%m-%Y)" site/index.html
