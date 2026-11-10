@@ -29,7 +29,6 @@ LOGGER_LEVEL = logging.INFO
 
 # Websites to scrape
 DOU_UA_BASE_URL = "https://jobs.dou.ua/vacancies/"
-DOU_UA_URL = f"{DOU_UA_BASE_URL}?category=Python"
 
 # Position key -> DOU category name
 POSITIONS = {
