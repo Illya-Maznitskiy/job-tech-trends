@@ -39,13 +39,8 @@ POSITIONS = {
     "data_science": "Data Science",
 }
 
-# ---------- NEW: one folder per position ----------
 POSITION_SCRAPING_OUTPUT_FILE = "scraping/data/{position}/jobs.csv"
 POSITION_ANALYSIS_OUTPUT_FILE = "analytics/data/{position}/tech_counts.csv"
-
-# ---------- OLD: single file, remove after the migration ----------
-SCRAPING_OUTPUT_FILE = "scraping/data/jobs.csv"
-ANALYSIS_OUTPUT_FILE = "analytics/data/tech_counts.csv"
 
 HTML_PAGE_OUTPUT_FILE = "analytics/data/index.html"
 MEMES_FILE = "analytics/data/memes/memes.json"
