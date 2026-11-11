@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import patch
 
 import pandas
@@ -11,6 +12,7 @@ from analytics.report_generator import (
     generate_report,
     template,
 )
+from config import MEMES_FILE
 
 
 def set_up_report(monkeypatch, positions=None):
@@ -133,3 +135,14 @@ def test_get_memes_missing_file(monkeypatch, tmp_path):
     )
 
     assert get_memes() == []
+
+
+def test_real_memes_have_fields_and_image_files():
+    memes = get_memes()
+    memes_dir = Path(MEMES_FILE).parent
+
+    assert memes
+    assert len({meme["file"] for meme in memes}) == len(memes)
+    for meme in memes:
+        assert {"file", "source", "author"} <= meme.keys()
+        assert (memes_dir / meme["file"]).is_file(), meme["file"]
