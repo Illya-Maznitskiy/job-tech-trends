@@ -129,8 +129,9 @@ Files: `analytics/report_generator.py`, `analytics/ai_analyzer.py`.
   - sends the tech-count data to the Gemini API
     for a natural-language market summary;
   - falls back through a list of model names:
-    `gemini-3.8-flash` → `gemini-3.7-flash` → `gemini-3.6-flash`
+    `gemini-3.6-flash` → `gemini-3.8-flash` → `gemini-3.7-flash`
     → `gemini-3.5-flash` → `gemini-3.5-flash-lite`;
+    `3.6` is first because it failed least in past runs;
   - returns `None` if the API key is missing or every model call fails.
     The report must still render without an AI summary.
 - The returned HTML is inserted into the template with `| safe`.
