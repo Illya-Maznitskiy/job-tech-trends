@@ -12,7 +12,7 @@ Analyze and visualize the most in-demand technologies in the job market.
 - Python
 - Scrapy
 - Pandas, ETL
-- Matplotlib, Jinja2 (HTML report)
+- Jinja2 (HTML report)
 - AI integration (Gemini API)
 - Pytest
 - Docker
@@ -20,8 +20,8 @@ Analyze and visualize the most in-demand technologies in the job market.
 
 
 ## Features
-- Scrape DOU.ua jobs and count the most in-demand technologies.
-- Create an HTML report with a chart and an AI market summary (Gemini).
+- Scrape DOU.ua jobs for 4 positions and count the most in-demand technologies.
+- Create an HTML report with a tab per position: a chart and an AI market summary (Gemini).
 - Update the live demo every Monday (GitHub Actions + Docker).
 
 

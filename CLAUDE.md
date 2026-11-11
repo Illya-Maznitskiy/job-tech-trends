@@ -13,7 +13,7 @@ venv\Scripts\activate          # Windows
 source venv/bin/activate       # macOS/Linux
 pip install -r requirements.txt
 
-# Run the full pipeline (scrape -> analyze -> visualize -> report)
+# Run the full pipeline (scrape -> analyze -> report)
 python main.py
 
 # Tests (~90% coverage target)
@@ -65,17 +65,33 @@ The pipeline runs as three sequential stages, orchestrated by `main.py`.
 Each stage reads the previous stage's CSV output from disk
 (no in-memory handoff).
 
+### Positions
+
+- `POSITIONS` in `config.py` maps a position key to a DOU category:
+  `python`, `frontend`, `devops`, `data_science`.
+- Every stage loops over `POSITIONS`.
+  Data is kept apart in one folder per position:
+  - `scraping/data/<position>/jobs.csv`
+  - `analytics/data/<position>/tech_counts.csv`
+- One broken position is skipped and logged.
+  It must not stop the others.
+- To add a position, add an entry to `POSITIONS`.
+
 ### 1. Scraping (`scraping/`)
 
 - A Scrapy project (`scraping/job_scraping/`) with a single spider:
   `DouUaSpider` (`spiders/douua.py`), which crawls `jobs.dou.ua`.
+  It takes a `category` argument (the DOU category name).
+- `scraper.py` runs the spider once per position, one at a time,
+  to keep the load on DOU low.
 - The site paginates via an XHR endpoint, not links:
   - the spider extracts a CSRF token from the initial page;
   - it replays the token as a `FormRequest` to fetch next pages;
   - it deduplicates on job URL;
   - it stops at `MAX_ITEMS_TO_SCRAPE` (`config.py`).
-- Output is written via Scrapy's `FEEDS` setting
-  directly to `SCRAPING_OUTPUT_FILE` (CSV).
+- Output is written via Scrapy's `FEEDS` setting.
+  `scraper.py` sets it per position, to
+  `POSITION_SCRAPING_OUTPUT_FILE` (CSV).
 - No `Item`/pipeline classes are in active use.
   `items.py`/`pipelines.py` are the unmodified Scrapy scaffold.
 - `config.py` also lists `Scraper.DJINNI` with a scrape limit,
@@ -83,7 +99,9 @@ Each stage reads the previous stage's CSV output from disk
 
 ### 2. Analysis (`analytics/analysis.py`)
 
-- Reads all CSVs from the scraping output directory.
+- Runs once per position.
+  Reads all CSVs from that position's scraping folder
+  and saves the counts to `POSITION_ANALYSIS_OUTPUT_FILE`.
 - Matches each job description against `TECHNOLOGIES_TO_ANALYZE`
   in `config.py`: a dict that maps a canonical technology name
   to a list of alias strings.
@@ -92,17 +110,22 @@ Each stage reads the previous stage's CSV output from disk
 - To track a new technology, add an entry to that dict.
   Nothing else needs to change.
 
-### 3. Visualization & reporting
+### 3. Reporting
 
-Files: `analytics/visualization.py`, `analytics/report_generator.py`,
-`analytics/ai_analyzer.py`.
+Files: `analytics/report_generator.py`, `analytics/ai_analyzer.py`.
 
-- `visualize_jobs()` renders the top-N tech counts
-  (`TECHNOLOGIES_TO_DISPLAY`) as a matplotlib bar chart.
-- Then it calls `generate_report()`, which renders
-  `analytics/templates/index.html` via Jinja2
+- `generate_report()` runs once, after all positions are analyzed.
+  It renders `analytics/templates/index.html` via Jinja2
   and opens it in a browser.
-- Report generation calls `analyze_market_with_ai()`:
+- For each position it builds one panel:
+  job count, top skills, a top-N chart
+  (`TECHNOLOGIES_TO_DISPLAY`) and an AI summary.
+  A position that fails is skipped, so it has no panel.
+  It raises an error only if no position has data.
+- The page has a tab per position. JS shows one panel
+  (`id="panel-<position>"`) at a time and keeps the choice
+  in the URL hash, like `#devops`.
+- Each position makes one `analyze_market_with_ai()` call:
   - sends the tech-count data to the Gemini API
     for a natural-language market summary;
   - falls back through a list of model names:
@@ -126,7 +149,7 @@ Files: `analytics/visualization.py`, `analytics/report_generator.py`,
 - Logging is configured once in `logger.py`:
   - rotating file handler at `logs/scraper.log` + stdout;
   - imported as the shared `logger` object everywhere;
-  - third-party loggers (scrapy, selenium, matplotlib, etc.)
+  - third-party loggers (scrapy, selenium, etc.)
     are tuned there too.
 
 
@@ -154,9 +177,12 @@ One workflow: `.github/workflows/deploy.yml`. Three jobs:
 3. `deploy`: run the pipeline in Docker, deploy the report to Pages.
    - Runs only on `main`, and only if `test` and `docker` pass.
    - Uses the `GEMINI_API_KEY` repository secret.
-   - Two guards stop the deploy, so the old site stays live:
-     no jobs in `jobs.csv`, or `index.html` is not from today.
-     They are needed because `main.py` never exits with an error.
+   - Guards stop the deploy, so the old site stays live:
+     - a position has 10 jobs or fewer in its `jobs.csv`
+       (`MIN_JOBS`), or no panel in `index.html`;
+     - `index.html` is not from today.
+     The positions come from `POSITIONS` in `config.py`.
+     Guards are needed because `main.py` never exits with an error.
 
 When it runs:
 
