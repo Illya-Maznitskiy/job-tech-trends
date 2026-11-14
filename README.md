@@ -36,7 +36,7 @@ cd job-tech-trends
 
 With [uv](https://docs.astral.sh/uv/):
 ```bash
-uv venv
+uv venv --python 3.13
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
 ```
