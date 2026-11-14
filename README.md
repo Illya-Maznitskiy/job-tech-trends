@@ -26,13 +26,25 @@ Analyze and visualize the most in-demand technologies in the job market.
 
 
 ## Setup
+Python 3.13 is required (same as the Dockerfile).
+
 To install the project locally on your computer, execute the following commands in a terminal:
 ```bash
 git clone https://github.com/Illya-Maznitskiy/job-tech-trends.git
 cd job-tech-trends
+```
+
+With [uv](https://docs.astral.sh/uv/):
+```bash
+uv venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
+```
+
+Or with plain pip:
+```bash
 python -m venv venv
-venv\Scripts\activate (on Windows)
-source venv/bin/activate (on macOS)
+source venv/bin/activate    # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
