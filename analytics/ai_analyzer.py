@@ -3,6 +3,7 @@ import os
 import pandas
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 from logger import logger
 from utils import get_position_url
@@ -29,7 +30,15 @@ def analyze_market_with_ai(
         "gemini-3.5-flash-lite",
     ]
 
-    client = genai.Client(api_key=api_key)
+    # No hidden SDK retries: on 429/503 the SDK sleeps for the server's
+    client = genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(
+            retry_options=types.HttpRetryOptions(
+                attempts=1, http_status_codes=[599]
+            ),
+        ),
+    )
     clean_data = counts.head(30).to_string(index=False)
     prompt = (
         "You are an expert tech career advisor. "
