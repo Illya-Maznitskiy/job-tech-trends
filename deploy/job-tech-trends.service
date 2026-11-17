@@ -5,4 +5,4 @@ After=network-online.target docker.service
 [Service]
 Type=oneshot
 User=illia
-ExecStart=/home/illia/job-tech-trends/deploy/run-weekly.sh
+ExecStart=/bin/bash /home/illia/projects/job-tech-trends/deploy/run-weekly.sh
