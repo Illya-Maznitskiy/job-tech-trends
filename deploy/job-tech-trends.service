@@ -1,5 +1,6 @@
 [Unit]
 Description=Build and publish the job-tech-trends report
+Wants=network-online.target
 After=network-online.target docker.service
 
 [Service]
